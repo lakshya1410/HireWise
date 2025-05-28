@@ -54,12 +54,6 @@ Make sure your resume isn’t getting filtered out. HireWise checks if your resu
 
 ---
 
-## 🏅 Trusted by Institutions
-
-HireWise is verified and recognized by various institutions for its innovation and real-world impact in the career-tech space. We're committed to empowering professionals with the tools they need to **succeed in the modern hiring landscape**.
-
----
-
 ## 🚀 Ready to Land Your Dream Job?
 
 1. Upload your resume.
@@ -76,9 +70,7 @@ Your dream job is just a few clicks away — with **HireWise**, you're not alone
 
 We’d love to hear your feedback and stories of success! Connect with us on:
 
-- 🌐 [Website Placeholder]
-- 📧 [Email Placeholder]
-- 💼 LinkedIn | Twitter | GitHub
+- 📧 pushkargupta993@gmail.com | lakshyatripathi9@gmail.com
 
 ---
 
