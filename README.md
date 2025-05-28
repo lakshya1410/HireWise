@@ -70,7 +70,7 @@ Your dream job is just a few clicks away — with **HireWise**, you're not alone
 
 We’d love to hear your feedback and stories of success! Connect with us on:
 
-- 📧 pushkargupta993@gmail.com | lakshyatripathi9@gmail.com
+- 📧 pushkargupta993@gmail.com | lakshyatripathiconnect@gmail.com
 
 ---
 
