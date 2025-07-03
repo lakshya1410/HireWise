@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern HireWise Landing Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        @keyframes grow {
+            0% { width: 0; }
+            100% { width: 75%; }
+        }
+        
+        .animate-grow {
+            animation: grow 3s ease-out forwards;
+        }
+        
+        .particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-[#0a1128] to-[#1a237e] text-white overflow-x-hidden">
+    <!-- Particle Background -->
+    <canvas id="particleCanvas" class="particle-canvas"></canvas>
+    
+    <!-- Navbar -->
+    <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent py-4">
+        <div class="container mx-auto px-4 md:px-8">
+            <nav class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                    <span class="ml-2 text-xl font-bold">HireWise</span>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <ul class="hidden md:flex space-x-8 items-center">
+                    <li><a href="#features" class="hover:text-[#00acc1] transition-colors">Features</a></li>
+                    <li><a href="#how-it-works" class="hover:text-[#00acc1] transition-colors">How It Works</a></li>
+                    <li><a href="#pricing" class="hover:text-[#00acc1] transition-colors">Pricing</a></li>
+                    <li><a href="#about" class="hover:text-[#00acc1] transition-colors">About</a></li>
+                    <li>
+                        <a href="#login" class="border border-[#00acc1] px-4 py-2 rounded-md hover:bg-[#00acc1]/20 transition-all">
+                            Log In
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#signup" class="bg-[#00acc1] px-4 py-2 rounded-md hover:bg-[#00acc1]/80 transition-all">
+                            Sign Up Free
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Mobile menu button -->
+                <button id="mobileMenuBtn" class="md:hidden text-white focus:outline-none">
+                    <svg id="menuIcon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                    <svg id="closeIcon" class="h-6 w-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </nav>
+
+            <!-- Mobile Navigation -->
+            <div id="mobileMenu" class="md:hidden absolute top-full left-0 right-0 bg-[#1a237e]/95 backdrop-blur-lg p-4 shadow-lg hidden">
+                <ul class="flex flex-col space-y-4">
+                    <li><a href="#features" class="block py-2">Features</a></li>
+                    <li><a href="#how-it-works" class="block py-2">How It Works</a></li>
+                    <li><a href="#pricing" class="block py-2">Pricing</a></li>
+                    <li><a href="#about" class="block py-2">About</a></li>
+                    <li class="pt-2">
+                        <a href="#login" class="block border border-[#00acc1] text-center px-4 py-2 rounded-md">
+                            Log In
+                        </a>
+                    </li>
+                    <li class="pt-2">
+                        <a href="#signup" class="block bg-[#00acc1] text-center px-4 py-2 rounded-md">
+                            Sign Up Free
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="pt-28 pb-20 md:pt-32 md:pb-24 px-4 relative overflow-hidden">
+        <div class="container mx-auto max-w-6xl relative z-10">
+            <div class="flex flex-col lg:flex-row items-center">
+                <div class="w-full lg:w-1/2 mb-12 lg:mb-0 text-center lg:text-left">
+                    <div class="relative inline-block mb-4">
+                        <span class="bg-[#00acc1]/20 text-[#00acc1] text-sm font-medium py-1 px-3 rounded-full">
+                            AI-Powered Interview Preparation
+                        </span>
+                        <div class="absolute -top-1 -right-1 animate-ping h-2 w-2 rounded-full bg-[#00acc1]"></div>
+                    </div>
+                    
+                    <h1 id="heroHeadline" class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                        HireWise: Your Smarter Path to Interview Success
+                    </h1>
+                    
+                    <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-xl mx-auto lg:mx-0">
+                        Get precise Resume-JD match scores, master AI interviews, and discover your next opportunity
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+                        <a href="#get-started" class="bg-[#00acc1] hover:bg-[#00acc1]/80 text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center">
+                            Get Interview Ready Now
+                            <svg class="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                        <a href="#how-it-works" class="bg-transparent border border-white/30 hover:border-white/60 text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center">
+                            How It Works
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="w-full lg:w-1/2 lg:pl-12">
+                    <div class="relative bg-gradient-to-br from-[#1a237e]/40 to-[#00acc1]/20 p-6 rounded-xl backdrop-blur-sm border border-white/10 shadow-xl transform transition-all duration-500 hover:shadow-[#00acc1]/20 hover:scale-[1.02]">
+                        <div class="absolute -top-3 -right-3 bg-[#00acc1] text-white text-xs font-bold py-1 px-2 rounded">
+                            <div class="flex items-center">
+                                <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l1.9 5.8a2 2 0 001.3 1.3L21 12l-5.8 1.9a2 2 0 00-1.3 1.3L12 21l-1.9-5.8a2 2 0 00-1.3-1.3L3 12l5.8-1.9a2 2 0 001.3-1.3L12 3z"></path>
+                                </svg>
+                                AI-Powered
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-xl font-semibold mb-4">Get Your Resume-JD Match Score</h3>
+                        
+                        <div class="bg-[#0a1128]/50 rounded-lg p-4 mb-4 border border-white/10">
+                            <div class="flex flex-col gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="bg-white/10 rounded-lg p-3">
+                                        <svg class="h-5 w-5 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm text-white/80">Upload your resume</p>
+                                        <div class="mt-1 h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                                            <div class="h-full bg-[#00acc1] rounded-full w-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-3">
+                                    <div class="bg-white/10 rounded-lg p-3">
+                                        <svg class="h-5 w-5 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm text-white/80">Paste job description</p>
+                                        <div class="mt-1 h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                                            <div class="h-full bg-[#00acc1] rounded-full w-0 animate-grow"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-[#00acc1] hover:bg-[#00acc1]/80 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 transform hover:translate-y-[-2px]">
+                            Get Free Match Score
+                        </button>
+                        
+                        <p class="text-center text-xs mt-3 text-gray-400">
+                            No credit card required • Results in 2 minutes
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Solution Section -->
+    <section id="features" class="py-20 px-4 relative overflow-hidden">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                    Common Challenges, <span class="text-[#00acc1]">Smart Solutions</span>
+                </h2>
+                <p class="max-w-2xl mx-auto text-gray-300">
+                    HireWise tackles the biggest obstacles in your job search journey with AI-powered tools designed for today's competitive market.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-12 lg:gap-20">
+                <!-- Problems Column -->
+                <div class="space-y-8">
+                    <h3 class="text-2xl font-semibold mb-6 border-b border-white/10 pb-2">
+                        Pain Points
+                    </h3>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="mt-1 p-2 rounded-full bg-red-500/20 text-red-400">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-medium mb-2">Resume not landing interviews?</h4>
+                            <p class="text-gray-300">
+                                Despite your qualifications, your resume might not be effectively highlighting your relevant skills and experience for specific job descriptions.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="mt-1 p-2 rounded-full bg-red-500/20 text-red-400">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-medium mb-2">Interview anxiety holding you back?</h4>
+                            <p class="text-gray-300">
+                                Nervousness and lack of preparation can prevent you from showcasing your true potential during crucial interview moments.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="mt-1 p-2 rounded-full bg-red-500/20 text-red-400">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-medium mb-2">Struggling to find relevant jobs?</h4>
+                            <p class="text-gray-300">
+                                Hours wasted searching multiple platforms with no systematic approach to track applications or opportunities.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-4">
+                        <div class="mt-1 p-2 rounded-full bg-red-500/20 text-red-400">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-medium mb-2">No feedback on interview performance?</h4>
+                            <p class="text-gray-300">
+                                Rejections without explanations leave you guessing what went wrong and how to improve for future opportunities.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Solutions Column -->
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 border-b border-white/10 pb-2">
+                        HireWise Solutions
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 gap-6">
+                        <!-- Card 1 -->
+                        <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-[#00acc1]/20 hover:scale-[1.02] hover:border-[#00acc1]/30 group">
+                            <div class="bg-[#00acc1]/20 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#00acc1]/30 transition-colors">
+                                <svg class="h-6 w-6 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-xl font-medium mb-2">Resume & JD Match</h4>
+                            <p class="text-gray-300">
+                                Upload resume + job description → Get instant compatibility score & gap analysis with AI-powered recommendations.
+                            </p>
+                        </div>
+                        
+                        <!-- Card 2 -->
+                        <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-[#00acc1]/20 hover:scale-[1.02] hover:border-[#00acc1]/30 group">
+                            <div class="bg-[#00acc1]/20 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#00acc1]/30 transition-colors">
+                                <svg class="h-6 w-6 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-xl font-medium mb-2">AI Mock Interviews</h4>
+                            <p class="text-gray-300">
+                                Practice with our AI interviewer → Real-time feedback on answers, tone & body language for continuous improvement.
+                            </p>
+                        </div>
+                        
+                        <!-- Card 3 -->
+                        <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-[#00acc1]/20 hover:scale-[1.02] hover:border-[#00acc1]/30 group">
+                            <div class="bg-[#00acc1]/20 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#00acc1]/30 transition-colors">
+                                <svg class="h-6 w-6 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-xl font-medium mb-2">Personalized Insights</h4>
+                            <p class="text-gray-300">
+                                Actionable improvement recommendations → Boost confidence & interview skills with data-driven personalized coaching.
+                            </p>
+                        </div>
+                        
+                        <!-- Card 4 -->
+                        <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-[#00acc1]/20 hover:scale-[1.02] hover:border-[#00acc1]/30 group">
+                            <div class="bg-[#00acc1]/20 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:bg-[#00acc1]/30 transition-colors">
+                                <svg class="h-6 w-6 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-xl font-medium mb-2">Job Discovery</h4>
+                            <p class="text-gray-300">
+                                Search & apply on Naukri + LinkedIn → All from one platform with integrated tracking and application management.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 px-4 bg-[#0a1128]/50 relative">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                    How <span class="text-[#00acc1]">HireWise</span> Works
+                </h2>
+                <p class="max-w-2xl mx-auto text-gray-300">
+                    Our streamlined process turns interview preparation into a science, giving you the competitive edge in just three simple steps.
+                </p>
+            </div>
+            
+            <div class="relative">
+                <!-- Desktop connector lines -->
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-[#00acc1]/0 via-[#00acc1]/50 to-[#00acc1]/0 transform -translate-y-1/2 z-0"></div>
+                
+                <!-- Steps -->
+                <div class="grid md:grid-cols-3 gap-8 relative z-10">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-center text-center">
+                        <div class="relative mb-6">
+                            <div class="w-20 h-20 bg-gradient-to-br from-[#1a237e] to-[#00acc1]/50 rounded-full flex items-center justify-center shadow-lg shadow-[#00acc1]/20">
+                                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                            </div>
+                            <div class="absolute -top-2 -right-2 bg-[#00acc1] w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                                1
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold mb-3">Upload & Analyze</h3>
+                        
+                        <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 h-full">
+                            <p class="text-gray-300">
+                                Upload your resume and job descriptions to receive an AI-powered compatibility analysis with specific improvement recommendations.
+                            </p>
+                            
+                            <div class="mt-4 p-3 bg-[#00acc1]/10 rounded-lg border border-[#00acc1]/20">
+                                <p class="text-sm font-medium text-[#00acc1]">
+                                    "92% of users improved their resume match score by following our AI recommendations"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-center text-center">
+                        <div class="relative mb-6">
+                            <div class="w-20 h-20 bg-gradient-to-br from-[#1a237e] to-[#00acc1]/50 rounded-full flex items-center justify-center shadow-lg shadow-[#00acc1]/20">
+                                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                            </div>
+                            <div class="absolute -top-2 -right-2 bg-[#00acc1] w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                                2
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold mb-3">Practice with AI</h3>
+                        
+                        <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 h-full">
+                            <p class="text-gray-300">
+                                Engage in realistic mock interviews with our AI interviewer that adapts to your responses and provides real-time feedback on your performance.
+                            </p>
+                            
+                            <div class="mt-4 p-3 bg-[#00acc1]/10 rounded-lg border border-[#00acc1]/20">
+                                <p class="text-sm font-medium text-[#00acc1]">
+                                    "Users who complete 5+ mock interviews are 3x more likely to receive job offers"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center text-center">
+                        <div class="relative mb-6">
+                            <div class="w-20 h-20 bg-gradient-to-br from-[#1a237e] to-[#00acc1]/50 rounded-full flex items-center justify-center shadow-lg shadow-[#00acc1]/20">
+                                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                            </div>
+                            <div class="absolute -top-2 -right-2 bg-[#00acc1] w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                                3
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-2xl font-bold mb-3">Improve & Succeed</h3>
+                        
+                        <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 h-full">
+                            <p class="text-gray-300">
+                                Review detailed performance analytics, implement personalized suggestions, and track your progress until you land your dream job.
+                            </p>
+                            
+                            <div class="mt-4 p-3 bg-[#00acc1]/10 rounded-lg border border-[#00acc1]/20">
+                                <p class="text-sm font-medium text-[#00acc1]">
+                                    "HireWise users report 68% faster time-to-hire compared to traditional methods"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CTA Button -->
+                <div class="mt-12 text-center">
+                    <a href="#get-started" class="inline-block bg-[#00acc1] hover:bg-[#00acc1]/80 text-white font-medium px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                        Start Your Journey Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Deep Dive Section -->
+    <section id="features-deep-dive" class="py-20 px-4 relative">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                    Powerful <span class="text-[#00acc1]">Features</span> For Your Success
+                </h2>
+                <p class="max-w-2xl mx-auto text-gray-300">
+                    Explore HireWise's comprehensive toolkit designed to transform your job search and interview preparation process.
+                </p>
+            </div>
+            
+            <!-- Feature Navigation Tabs -->
+            <div class="flex flex-wrap justify-center gap-2 mb-12">
+                <button class="feature-tab active flex items-center gap-2 py-2 px-4 rounded-full transition-all bg-[#00acc1] text-white" data-feature="0">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Resume-JD Compatibility Analysis</span>
+                </button>
+                <button class="feature-tab flex items-center gap-2 py-2 px-4 rounded-full transition-all bg-white/5 hover:bg-white/10" data-feature="1">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">AI Interview Coaching</span>
+                </button>
+                <button class="feature-tab flex items-center gap-2 py-2 px-4 rounded-full transition-all bg-white/5 hover:bg-white/10" data-feature="2">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Voice & Tone Analysis</span>
+                </button>
+                <button class="feature-tab flex items-center gap-2 py-2 px-4 rounded-full transition-all bg-white/5 hover:bg-white/10" data-feature="3">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Performance Analytics Dashboard</span>
+                </button>
+                <button class="feature-tab flex items-center gap-2 py-2 px-4 rounded-full transition-all bg-white/5 hover:bg-white/10" data-feature="4">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Integrated Job Search</span>
+                </button>
+                <button class="feature-tab flex items-center gap-2 py-2 px-4 rounded-full transition-all bg-white/5 hover:bg-white/10" data-feature="5">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Interview Scheduling & Tracking</span>
+                </button>
+            </div>
+            
+            <!-- Active Feature Display -->
+            <div class="grid md:grid-cols-2 gap-8 lg:gap-16 items-center">
+                <div class="order-2 md:order-1">
+                    <div class="p-1 rounded-xl bg-gradient-to-r from-[#00acc1] to-[#1a237e] shadow-xl">
+                        <div id="feature-mockup" class="bg-gradient-to-br from-[#1a237e]/40 to-[#00acc1]/20 p-5 rounded-xl border border-white/10">
+                            <!-- Feature 0 mockup (default) -->
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-semibold">Resume Match Analysis</h4>
+                                <span class="text-[#00acc1] font-bold">78%</span>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Technical Skills</span>
+                                        <span class="text-[#00acc1]">85%</span>
+                                    </div>
+                                    <div class="h-2 bg-white/10 rounded-full">
+                                        <div class="h-full bg-[#00acc1] rounded-full" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Experience</span>
+                                        <span class="text-[#00acc1]">72%</span>
+                                    </div>
+                                    <div class="h-2 bg-white/10 rounded-full">
+                                        <div class="h-full bg-[#00acc1] rounded-full" style="width: 72%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Education</span>
+                                        <span class="text-[#00acc1]">90%</span>
+                                    </div>
+                                    <div class="h-2 bg-white/10 rounded-full">
+                                        <div class="h-full bg-[#00acc1] rounded-full" style="width: 90%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Keywords</span>
+                                        <span class="text-[#00acc1]">65%</span>
+                                    </div>
+                                    <div class="h-2 bg-white/10 rounded-full">
+                                        <div class="h-full bg-[#00acc1] rounded-full" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 p-3 bg-white/5 rounded-lg">
+                                <h5 class="text-sm font-medium mb-2">Recommendations:</h5>
+                                <ul class="text-xs space-y-1 text-gray-300">
+                                    <li>• Add more cloud deployment experience to your resume</li>
+                                    <li>• Highlight team leadership skills in your summary</li>
+                                    <li>• Include specific metrics from previous projects</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-1 md:order-2">
+                    <div class="inline-flex items-center gap-2 bg-[#00acc1]/20 text-[#00acc1] text-sm font-medium py-1 px-3 rounded-full mb-4">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Feature Highlight</span>
+                    </div>
+                    
+                    <h3 id="feature-title" class="text-3xl font-bold mb-4">Resume-JD Compatibility Analysis</h3>
+                    
+                    <p id="feature-description" class="text-gray-300 text-lg mb-6">
+                        Our AI analyzes your resume against job descriptions to identify gaps, suggest improvements, and maximize your match score.
+                    </p>
+                    
+                    <div id="feature-benefits" class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-[#00acc1]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-[#00acc1] text-sm">✓</span>
+                            </div>
+                            <p class="text-gray-300">Analyzes keyword frequency and relevance to job requirements</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-[#00acc1]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-[#00acc1] text-sm">✓</span>
+                            </div>
+                            <p class="text-gray-300">Identifies missing skills and experience gaps</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-[#00acc1]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-[#00acc1] text-sm">✓</span>
+                            </div>
+                            <p class="text-gray-300">Suggests tailored improvements to increase match percentage</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <a href="#get-started" class="inline-flex items-center text-[#00acc1] font-medium hover:text-[#00acc1]/80 transition-colors">
+                            Try this feature
+                            <svg class="ml-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Section -->
+    <section class="py-20 px-4 bg-[#0a1128]/50 relative">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                    Success <span class="text-[#00acc1]">Stories</span>
+                </h2>
+                <p class="max-w-2xl mx-auto text-gray-300">
+                    Join thousands of professionals who have transformed their careers with HireWise.
+                </p>
+            </div>
+            
+            <!-- Testimonial Carousel -->
+            <div class="relative mb-20">
+                <div class="overflow-hidden rounded-xl">
+                    <div id="testimonialCarousel" class="flex transition-transform duration-500 ease-in-out">
+                        <!-- Testimonial 1 -->
+                        <div class="w-full flex-shrink-0 px-4">
+                            <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-8 md:p-10 backdrop-blur-sm border border-white/10">
+                                <div class="flex flex-col md:flex-row gap-6">
+                                    <div class="md:w-1/4 flex flex-col items-center">
+                                        <div class="w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-[#00acc1]">
+                                            <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150" alt="Alex Chen" class="w-full h-full object-cover">
+                                        </div>
+                                        
+                                        <h4 class="text-lg font-semibold text-center">Alex Chen</h4>
+                                        <p class="text-sm text-gray-300 text-center mb-1">Software Engineer</p>
+                                        <p class="text-xs text-[#00acc1] font-medium text-center">Secured position at Google</p>
+                                        
+                                        <div class="flex items-center mt-3">
+                                            <svg class="h-4 w-4 text-[#ffd54f] fill-[#ffd54f]" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                            <svg class="h-4 w-4 text-[#ffd54f] fill-[#ffd54f]" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                            <svg class="h-4 w-4 text-[#ffd54f] fill-[#ffd54f]" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                            <svg class="h-4 w-4 text-[#ffd54f] fill-[#ffd54f]" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                            <svg class="h-4 w-4 text-[#ffd54f] fill-[#ffd54f]" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="md:w-3/4">
+                                        <div class="h-full flex flex-col justify-center">
+                                            <div class="text-5xl text-[#00acc1]/30 font-serif mb-4">"</div>
+                                            <p class="text-lg mb-6">
+                                                HireWise transformed my interview preparation. The AI mock interviews identified weaknesses in my responses that no one else had caught. After just 2 weeks of practice, I felt confident and prepared for my Google interview.
+                                            </p>
+                                            <div class="text-5xl text-[#00acc1]/30 font-serif self-end">"</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional testimonials would go here -->
+                    </div>
+                </div>
+                
+                <!-- Carousel Controls -->
+                <button id="prevTestimonial" class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                
+                <button id="nextTestimonial" class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+                
+                <!-- Carousel Indicators -->
+                <div class="flex justify-center mt-6 gap-2">
+                    <button class="testimonial-indicator w-3 h-3 rounded-full transition-colors bg-[#00acc1]" data-index="0"></button>
+                    <button class="testimonial-indicator w-3 h-3 rounded-full transition-colors bg-white/20 hover:bg-white/40" data-index="1"></button>
+                    <button class="testimonial-indicator w-3 h-3 rounded-full transition-colors bg-white/20 hover:bg-white/40" data-index="2"></button>
+                </div>
+            </div>
+            
+            <!-- Stats Section -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 transition-transform duration-300 hover:transform hover:scale-105 hover:shadow-lg hover:shadow-[#00acc1]/10">
+                    <p class="text-3xl md:text-4xl font-bold text-[#00acc1] mb-2">10,000+</p>
+                    <p class="text-sm text-gray-300">Interviews Practiced</p>
+                </div>
+                <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 transition-transform duration-300 hover:transform hover:scale-105 hover:shadow-lg hover:shadow-[#00acc1]/10">
+                    <p class="text-3xl md:text-4xl font-bold text-[#00acc1] mb-2">95%</p>
+                    <p class="text-sm text-gray-300">Success Rate</p>
+                </div>
+                <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 transition-transform duration-300 hover:transform hover:scale-105 hover:shadow-lg hover:shadow-[#00acc1]/10">
+                    <p class="text-3xl md:text-4xl font-bold text-[#00acc1] mb-2">500+</p>
+                    <p class="text-sm text-gray-300">Companies Hiring</p>
+                </div>
+                <div class="bg-gradient-to-br from-[#1a237e]/30 to-[#00acc1]/10 rounded-xl p-6 backdrop-blur-sm border border-white/10 transition-transform duration-300 hover:transform hover:scale-105 hover:shadow-lg hover:shadow-[#00acc1]/10">
+                    <p class="text-3xl md:text-4xl font-bold text-[#00acc1] mb-2">4.9/5</p>
+                    <p class="text-sm text-gray-300">User Rating</p>
+                </div>
+            </div>
+            
+            <!-- Trusted By Companies -->
+            <div class="mt-20 text-center">
+                <p class="text-sm text-gray-400 uppercase tracking-wider mb-6">Trusted by professionals from</p>
+                
+                <div class="flex flex-wrap justify-center items-center gap-8 opacity-70">
+                    <div class="h-8 text-white/50 font-bold text-xl">GOOGLE</div>
+                    <div class="h-8 text-white/50 font-bold text-xl">AMAZON</div>
+                    <div class="h-8 text-white/50 font-bold text-xl">MICROSOFT</div>
+                    <div class="h-8 text-white/50 font-bold text-xl">META</div>
+                    <div class="h-8 text-white/50 font-bold text-xl">APPLE</div>
+                    <div class="h-8 text-white/50 font-bold text-xl">NETFLIX</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section id="get-started" class="py-20 px-4 relative overflow-hidden">
+        <div class="container mx-auto max-w-5xl relative z-10">
+            <div class="bg-gradient-to-br from-[#1a237e]/70 to-[#00acc1]/40 rounded-2xl p-8 md:p-12 backdrop-blur-sm border border-white/10 shadow-xl">
+                <!-- Decorative elements -->
+                <div class="absolute top-0 right-0 w-40 h-40 bg-[#00acc1]/20 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-40 h-40 bg-[#1a237e]/30 rounded-full blur-3xl"></div>
+                
+                <div class="relative">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center gap-2 bg-white/10 text-white text-sm font-medium py-1 px-4 rounded-full mb-4">
+                            <svg class="h-4 w-4 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l1.9 5.8a2 2 0 001.3 1.3L21 12l-5.8 1.9a2 2 0 00-1.3 1.3L12 21l-1.9-5.8a2 2 0 00-1.3-1.3L3 12l5.8-1.9a2 2 0 001.3-1.3L12 3z"></path>
+                            </svg>
+                            <span>AI-Powered Career Transformation</span>
+                        </div>
+                        
+                        <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+                            Ready to Transform Your Interview Game?
+                        </h2>
+                        
+                        <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                            Join thousands of professionals who have accelerated their careers with HireWise's AI-powered interview preparation.
+                        </p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-8 mb-12">
+                        <div class="bg-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <div class="bg-[#00acc1]/20 p-2 rounded-lg mr-3">
+                                    <svg class="h-5 w-5 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                Free Starter
+                            </h3>
+                            
+                            <ul class="space-y-3 mb-6">
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>1 Resume-JD compatibility analysis</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>3 AI mock interview sessions</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Basic performance analytics</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Job search (limited results)</span>
+                                </li>
+                            </ul>
+                            
+                            <a href="#free-assessment" class="block w-full bg-white/10 hover:bg-white/20 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 text-center">
+                                Start Your Free Assessment
+                            </a>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-[#00acc1]/20 to-[#1a237e]/30 rounded-xl p-6 backdrop-blur-sm border border-[#00acc1]/30 relative overflow-hidden shadow-lg">
+                            <div class="absolute top-0 right-0 bg-[#00acc1] text-xs font-bold py-1 px-3 rounded-bl-lg">
+                                MOST POPULAR
+                            </div>
+                            
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <div class="bg-[#00acc1]/20 p-2 rounded-lg mr-3">
+                                    <svg class="h-5 w-5 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l1.9 5.8a2 2 0 001.3 1.3L21 12l-5.8 1.9a2 2 0 00-1.3 1.3L12 21l-1.9-5.8a2 2 0 00-1.3-1.3L3 12l5.8-1.9a2 2 0 001.3-1.3L12 3z"></path>
+                                    </svg>
+                                </div>
+                                Pro Plan
+                            </h3>
+                            
+                            <ul class="space-y-3 mb-6">
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Unlimited Resume-JD compatibility analyses</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Unlimited AI mock interview sessions</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Advanced analytics with improvement tracking</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Full job search integration with Naukri & LinkedIn</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Voice & tone analysis with feedback</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <svg class="h-5 w-5 text-[#00acc1] mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span>Interview scheduling & application tracking</span>
+                                </li>
+                            </ul>
+                            
+                            <a href="#pro-signup" class="block w-full bg-[#00acc1] hover:bg-[#00acc1]/80 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 text-center">
+                                Get Pro Access
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <p class="text-gray-400 text-sm mb-6">
+                            No credit card required • Get results in 2 minutes • Cancel anytime
+                        </p>
+                        
+                        <a href="#learn-more" class="inline-flex items-center text-[#00acc1] font-medium hover:text-[#00acc1]/80 transition-colors">
+                            Learn more about our plans
+                            <svg class="ml-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#0a1128] pt-16 pb-8 px-4 relative">
+        <div class="container mx-auto max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+                <!-- Company Info -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center mb-4">
+                        <svg class="h-8 w-8 text-[#00acc1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        <span class="ml-2 text-xl font-bold">HireWise</span>
+                    </div>
+                    
+                    <p class="text-gray-300 mb-6 max-w-md">
+                        HireWise uses advanced AI to transform your job search and interview preparation, helping you land your dream job faster.
+                    </p>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <svg class="h-5 w-5 text-[#00acc1] mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <a href="mailto:contact@hirewise.ai" class="text-gray-300 hover:text-white transition-colors">
+                                contact@hirewise.ai
+                            </a>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <svg class="h-5 w-5 text-[#00acc1] mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <a href="tel:+18005551234" class="text-gray-300 hover:text-white transition-colors">
+                                +1 (800) 555-1234
+                            </a>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <svg class="h-5 w-5 text-[#00acc1] mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="text-gray-300">
+                                123 AI Innovation Center<br>
+                                San Francisco, CA 94107
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#about" class="text-gray-300 hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#careers" class="text-gray-300 hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="#blog" class="text-gray-300 hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#press" class="text-gray-300 hover:text-white transition-colors">Press</a></li>
+                        <li><a href="#contact" class="text-gray-300 hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Features</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#resume-match" class="text-gray-300 hover:text-white transition-colors">Resume Match</a></li>
+                        <li><a href="#ai-interviews" class="text-gray-300 hover:text-white transition-colors">AI Interviews</a></li>
+                        <li><a href="#voice-analysis" class="text-gray-300 hover:text-white transition-colors">Voice Analysis</a></li>
+                        <li><a href="#job-search" class="text-gray-300 hover:text-white transition-colors">Job Search</a></li>
+                        <li><a href="#analytics" class="text-gray-300 hover:text-white transition-colors">Analytics</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#help" class="text-gray-300 hover:text-white transition-colors">Help Center</a></li>
+                        <li><a href="#pricing" class="text-gray-300 hover:text-white transition-colors">Pricing</a></li>
+                        <li><a href="#faq" class="text-gray-300 hover:text-white transition-colors">FAQs</a></li>
+                        <li><a href="#privacy" class="text-gray-300 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#terms" class="text-gray-300 hover:text-white transition-colors">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Social Links & Newsletter -->
+            <div class="border-t border-white/10 pt-8 pb-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex space-x-4 mb-4 md:mb-0">
+                        <a href="#twitter" class="text-gray-400 hover:text-[#00acc1] transition-colors">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84"></path>
+                            </svg>
+                        </a>
+                        <a href="#linkedin" class="text-gray-400 hover:text-[#00acc1] transition-colors">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                        <a href="#facebook" class="text-gray-400 hover:text-[#00acc1] transition-colors">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M20 10C20 4.477 15.523 0 10 0S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                        <a href="#instagram" class="text-gray-400 hover:text-[#00acc1] transition-colors">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                        <a href="#github" class="text-gray-400 hover:text-[#00acc1] transition-colors">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                        <a href="#youtube" class="text-gray-400 hover:text-[#00acc1] transition-colors">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <span class="text-xs text-gray-500 mr-2">Powered by</span>
+                        <div class="flex items-center bg-white/5 rounded-full px-3 py-1">
+                            <svg class="h-3 w-3 text-[#00acc1] mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l1.9 5.8a2 2 0 001.3 1.3L21 12l-5.8 1.9a2 2 0 00-1.3 1.3L12 21l-1.9-5.8a2 2 0 00-1.3-1.3L3 12l5.8-1.9a2 2 0 001.3-1.3L12 3z"></path>
+                            </svg>
+                            <span class="text-xs font-medium">Advanced AI</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Copyright -->
+            <div class="text-center pt-4">
+                <p class="text-gray-500 text-sm">
+                    &copy; <span id="currentYear"></span> HireWise AI. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Particle Background Animation
+        function initParticleBackground() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            function setCanvasSize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            
+            setCanvasSize();
+            window.addEventListener('resize', setCanvasSize);
+            
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedX = Math.random() * 0.5 - 0.25;
+                    this.speedY = Math.random() * 0.5 - 0.25;
+                    this.color = `rgba(0, 172, 193, ${Math.random() * 0.4})`;
+                }
+                
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    
+                    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+                }
+                
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+            }
+            
+            const particles = [];
+            const particleCount = Math.min(window.innerWidth / 10, 100);
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+            
+            function connectParticles() {
+                const maxDistance = 100;
+                
+                for (let a = 0; a < particles.length; a++) {
+                    for (let b = a; b < particles.length; b++) {
+                        const dx = particles[a].x - particles[b].x;
+                        const dy = particles[a].y - particles[b].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < maxDistance) {
+                            const opacity = 1 - (distance / maxDistance);
+                            ctx.strokeStyle = `rgba(0, 172, 193, ${opacity * 0.2})`;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[a].x, particles[a].y);
+                            ctx.lineTo(particles[b].x, particles[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                for (const particle of particles) {
+                    particle.update();
+                    particle.draw();
+                }
+                
+                connectParticles();
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        // Navbar scroll effect
+        function initNavbar() {
+            const navbar = document.getElementById('navbar');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const menuIcon = document.getElementById('menuIcon');
+            const closeIcon = document.getElementById('closeIcon');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('bg-[#1a237e]/90', 'backdrop-blur-md', 'py-2', 'shadow-lg');
+                    navbar.classList.remove('bg-transparent', 'py-4');
+                } else {
+                    navbar.classList.remove('bg-[#1a237e]/90', 'backdrop-blur-md', 'py-2', 'shadow-lg');
+                    navbar.classList.add('bg-transparent', 'py-4');
+                }
+            });
+            
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                menuIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
+            });
+        }
+
+        // Hero headline animation
+        function initHeroAnimation() {
+            const headline = document.getElementById('heroHeadline');
+            const text = headline.innerText;
+            headline.innerHTML = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.innerText = char;
+                span.style.opacity = '0';
+                span.style.animation = `fadeIn 0.1s forwards ${index * 0.03}s`;
+                headline.appendChild(span);
+            });
+        }
+
+        // Feature tabs functionality
+        function initFeatureTabs() {
+            const tabs = document.querySelectorAll('.feature-tab');
+            const mockup = document.getElementById('feature-mockup');
+            const title = document.getElementById('feature-title');
+            const description = document.getElementById('feature-description');
+            const benefits = document.getElementById('feature-benefits');
+            
+            const features = [
+                {
+                    title: 'Resume-JD Compatibility Analysis',
+                    description: 'Our AI analyzes your resume against job descriptions to identify gaps, suggest improvements, and maximize your match score.',
+                    benefits: [
+                        'Analyzes keyword frequency and relevance to job requirements',
+                        'Identifies missing skills and experience gaps',
+                        'Suggests tailored improvements to increase match percentage'
+                    ],
+                    mockup: `
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-semibold">Resume Match Analysis</h4>
+                            <span class="text-[#00acc1] font-bold">78%</span>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Technical Skills</span>
+                                    <span class="text-[#00acc1]">85%</span>
+                                </div>
+                                <div class="h-2 bg-white/10 rounded-full">
+                                    <div class="h-full bg-[#00acc1] rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Experience</span>
+                                    <span class="text-[#00acc1]">72%</span>
+                                </div>
+                                <div class="h-2 bg-white/10 rounded-full">
+                                    <div class="h-full bg-[#00acc1] rounded-full" style="width: 72%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Education</span>
+                                    <span class="text-[#00acc1]">90%</span>
+                                </div>
+                                <div class="h-2 bg-white/10 rounded-full">
+                                    <div class="h-full bg-[#00acc1] rounded-full" style="width: 90%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Keywords</span>
+                                    <span class="text-[#00acc1]">65%</span>
+                                </div>
+                                <div class="h-2 bg-white/10 rounded-full">
+                                    <div class="h-full bg-[#00acc1] rounded-full" style="width: 65%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-3 bg-white/5 rounded-lg">
+                            <h5 class="text-sm font-medium mb-2">Recommendations:</h5>
+                            <ul class="text-xs space-y-1 text-gray-300">
+                                <li>• Add more cloud deployment experience to your resume</li>
+                                <li>• Highlight team leadership skills in your summary</li>
+                                <li>• Include specific metrics from previous projects</li>
+                            </ul>
+                        </div>
+                    `
+                },
+                // Add other features here...
+            ];
+            
+            tabs.forEach((tab, index) => {
+                tab.addEventListener('click', () => {
+                    // Update active tab
+                    tabs.forEach(t => {
+                        t.classList.remove('bg-[#00acc1]', 'text-white');
+                        t.classList.add('bg-white/5', 'hover:bg-white/10');
+                    });
+                    tab.classList.add('bg-[#00acc1]', 'text-white');
+                    tab.classList.remove('bg-white/5', 'hover:bg-white/10');
+                    
+                    // Update content
+                    if (features[index]) {
+                        title.textContent = features[index].title;
+                        description.textContent = features[index].description;
+                        mockup.innerHTML = features[index].mockup;
+                        
+                        benefits.innerHTML = features[index].benefits.map(benefit => `
+                            <div class="flex items-start gap-3">
+                                <div class="w-6 h-6 rounded-full bg-[#00acc1]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <span class="text-[#00acc1] text-sm">✓</span>
+                                </div>
+                                <p class="text-gray-300">${benefit}</p>
+                            </div>
+                        `).join('');
+                    }
+                });
+            });
+        }
+
+        // Set current year in footer
+        function setCurrentYear() {
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        }
+
+        // Initialize all functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            initParticleBackground();
+            initNavbar();
+            initHeroAnimation();
+            initFeatureTabs();
+            setCurrentYear();
+        });
+    </script>
+</body>
+</html>
