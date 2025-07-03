@@ -35,7 +35,7 @@ export const Navbar: React.FC = () => {
             <li><a href="#about" className="hover:text-[#00acc1] transition-colors">About</a></li>
             <li>
               <a 
-                href="#login" 
+                href="#login" // Changed from #login to #login
                 className="border border-[#00acc1] px-4 py-2 rounded-md hover:bg-[#00acc1]/20 transition-all"
               >
                 Log In
@@ -43,7 +43,7 @@ export const Navbar: React.FC = () => {
             </li>
             <li>
               <a 
-                href="#signup" 
+                href="#signup" // Changed from #signup to #signup
                 className="bg-[#00acc1] px-4 py-2 rounded-md hover:bg-[#00acc1]/80 transition-all"
               >
                 Sign Up Free

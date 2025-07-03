@@ -9,6 +9,7 @@ import { FinalCTA } from './components/FinalCTA';
 import { Footer } from './components/Footer';
 import { ParticleBackground } from './components/ParticleBackground';
 
+
 function App() {
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-[#0a1128] to-[#1a237e] text-white overflow-hidden">
