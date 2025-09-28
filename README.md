@@ -1,4 +1,4 @@
-Here is the updated README file, including steps on how to clone the repository and get started with the application:
+
 
 # 🚀 HireWise – Your Smart Career Companion
 
