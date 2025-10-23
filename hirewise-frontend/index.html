@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireWise - AI-Powered Interview Practice Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/theme.css">
+</head>
+<body class="bg-primary-dark text-white">
+    <!-- Particle Background - Global -->
+    <canvas id="particle-canvas"></canvas>
+    
+    <!-- Scroll Progress Indicator -->
+    <div id="scroll-progress" class="fixed top-0 left-0 h-1 bg-accent-cyan z-50 transition-all duration-300" style="width: 0%"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed w-full top-0 z-50 bg-primary-dark/90 backdrop-blur-sm border-b border-accent-cyan/20">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <img src="assets/images/logo.svg" alt="HireWise Logo" class="h-8 w-8" onerror="this.style.display='none'">
+                    <span class="text-2xl font-bold text-accent-cyan">HireWise</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="hover:text-accent-cyan transition">Features</a>
+                    <a href="#how-it-works" class="hover:text-accent-cyan transition">How It Works</a>
+                    <a href="#testimonials" class="hover:text-accent-cyan transition">Success Stories</a>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="auth.html?mode=login" class="px-6 py-2 border border-accent-cyan text-accent-cyan rounded-lg hover:bg-accent-cyan hover:text-white transition">Login</a>
+                    <a href="auth.html?mode=signup" class="px-6 py-2 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        <div class="container mx-auto px-6 z-10 text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+                Master Your <span class="text-accent-cyan">Interview Skills</span> with AI
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                Practice with AI-powered mock interviews, get real-time feedback, and land your dream job with confidence.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="auth.html?mode=signup" class="px-8 py-4 bg-accent-cyan text-white rounded-lg text-lg font-semibold hover:bg-accent-cyan/90 transition transform hover:scale-105">
+                    Start Free Trial
+                </a>
+                <a href="#features" class="px-8 py-4 border-2 border-accent-cyan text-accent-cyan rounded-lg text-lg font-semibold hover:bg-accent-cyan/10 transition">
+                    Learn More
+                </a>
+            </div>
+            <div class="mt-12 flex justify-center gap-8 text-center">
+                <div>
+                    <div class="text-3xl font-bold text-accent-cyan">10K+</div>
+                    <div class="text-gray-400">Active Users</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-accent-cyan">50K+</div>
+                    <div class="text-gray-400">Mock Interviews</div>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-accent-cyan">85%</div>
+                    <div class="text-gray-400">Success Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pain Points Section -->
+    <section class="py-20 border-t-2 border-accent-cyan/30">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-12">The Interview <span class="text-accent-cyan">Challenge</span></h2>
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-6 backdrop-blur-sm">
+                    <div class="text-red-500 text-5xl mb-4">❌</div>
+                    <h3 class="text-xl font-bold mb-3 text-red-400">Without HireWise</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>• Limited practice opportunities</li>
+                        <li>• No feedback on performance</li>
+                        <li>• Nervous and unprepared</li>
+                        <li>• Resume not ATS-optimized</li>
+                        <li>• Mismatch with job descriptions</li>
+                        <li>• Low confidence levels</li>
+                    </ul>
+                </div>
+                <div class="bg-green-900/20 border border-accent-cyan/30 rounded-lg p-6 backdrop-blur-sm">
+                    <div class="text-accent-cyan text-5xl mb-4">✓</div>
+                    <h3 class="text-xl font-bold mb-3 text-accent-cyan">With HireWise</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li>• Unlimited AI mock interviews</li>
+                        <li>• Real-time feedback & analysis</li>
+                        <li>• Confident and well-prepared</li>
+                        <li>• ATS-optimized resume</li>
+                        <li>• Perfect JD-resume matching</li>
+                        <li>• 85% interview success rate</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 border-t-2 border-accent-cyan/30">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-4">Powerful <span class="text-accent-cyan">Features</span></h2>
+            <p class="text-center text-gray-400 mb-12">Everything you need to ace your next interview</p>
+            
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <div class="feature-card border border-accent-cyan/20 rounded-lg p-8 hover:border-accent-cyan/50 transition cursor-pointer backdrop-blur-md">
+                    <div class="text-5xl mb-4">🎤</div>
+                    <h3 class="text-2xl font-bold mb-3">AI Mock Interviews</h3>
+                    <p class="text-gray-400">Practice with AI interviewer. Get real-time feedback on answers, tone, and body language.</p>
+                </div>
+                <div class="feature-card border border-accent-cyan/20 rounded-lg p-8 hover:border-accent-cyan/50 transition cursor-pointer backdrop-blur-md">
+                    <div class="text-5xl mb-4">🎯</div>
+                    <h3 class="text-2xl font-bold mb-3">JD Matcher</h3>
+                    <p class="text-gray-400">Compare your resume with job descriptions. Get compatibility scores and improvement tips.</p>
+                </div>
+                <div class="feature-card border border-accent-cyan/20 rounded-lg p-8 hover:border-accent-cyan/50 transition cursor-pointer backdrop-blur-md">
+                    <div class="text-5xl mb-4">✅</div>
+                    <h3 class="text-2xl font-bold mb-3">ATS Checker</h3>
+                    <p class="text-gray-400">Ensure your resume passes ATS systems with optimization suggestions.</p>
+                </div>
+                <div class="feature-card border border-accent-cyan/20 rounded-lg p-8 hover:border-accent-cyan/50 transition cursor-pointer backdrop-blur-md">
+                    <div class="text-5xl mb-4">📊</div>
+                    <h3 class="text-2xl font-bold mb-3">Performance Analytics</h3>
+                    <p class="text-gray-400">Track your progress with detailed analytics, streaks, and improvement metrics.</p>
+                </div>
+                <div class="feature-card border border-accent-cyan/20 rounded-lg p-8 hover:border-accent-cyan/50 transition cursor-pointer backdrop-blur-md">
+                    <div class="text-5xl mb-4">💼</div>
+                    <h3 class="text-2xl font-bold mb-3">Job Discovery</h3>
+                    <p class="text-gray-400">Find relevant jobs with match scores based on your profile and skills.</p>
+                </div>
+                <div class="feature-card border border-accent-cyan/20 rounded-lg p-8 hover:border-accent-cyan/50 transition cursor-pointer backdrop-blur-md">
+                    <div class="text-5xl mb-4">📅</div>
+                    <h3 class="text-2xl font-bold mb-3">Smart Calendar</h3>
+                    <p class="text-gray-400">Schedule and track interviews. Maintain practice streaks for better results.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 border-t-2 border-accent-cyan/30">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-12">How It <span class="text-accent-cyan">Works</span></h2>
+            <div class="max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center mb-12">
+                    <div class="md:w-1/3 mb-6 md:mb-0">
+                        <div class="w-24 h-24 bg-accent-cyan/20 rounded-full flex items-center justify-center text-4xl font-bold text-accent-cyan mx-auto">1</div>
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-3">Sign Up & Create Profile</h3>
+                        <p class="text-gray-400">Create your account, upload your resume, and set your career goals.</p>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row-reverse items-center mb-12">
+                    <div class="md:w-1/3 mb-6 md:mb-0">
+                        <div class="w-24 h-24 bg-accent-cyan/20 rounded-full flex items-center justify-center text-4xl font-bold text-accent-cyan mx-auto">2</div>
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-3">Take Mock Interviews</h3>
+                        <p class="text-gray-400">Practice with AI interviewer tailored to your target role and industry.</p>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row items-center mb-12">
+                    <div class="md:w-1/3 mb-6 md:mb-0">
+                        <div class="w-24 h-24 bg-accent-cyan/20 rounded-full flex items-center justify-center text-4xl font-bold text-accent-cyan mx-auto">3</div>
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-3">Get Detailed Feedback</h3>
+                        <p class="text-gray-400">Receive AI-powered analysis on your answers, tone, body language, and more.</p>
+                    </div>
+                </div>
+                <div class="flex flex-col md:flex-row-reverse items-center">
+                    <div class="md:w-1/3 mb-6 md:mb-0">
+                        <div class="w-24 h-24 bg-accent-cyan/20 rounded-full flex items-center justify-center text-4xl font-bold text-accent-cyan mx-auto">4</div>
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="text-2xl font-bold mb-3">Improve & Succeed</h3>
+                        <p class="text-gray-400">Track your progress, optimize your resume, and land your dream job!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20 border-t-2 border-accent-cyan/30">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-12">Success <span class="text-accent-cyan">Stories</span></h2>
+            <div id="testimonials-container" class="grid md:grid-cols-3 gap-8">
+                <!-- Testimonials will be loaded dynamically -->
+                <div class="border border-accent-cyan/20 rounded-lg p-6 backdrop-blur-md bg-primary-dark-secondary/30">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-accent-cyan/20 rounded-full flex items-center justify-center text-xl font-bold">?</div>
+                        <div class="ml-4">
+                            <div class="font-bold">Your Story Here</div>
+                            <div class="text-sm text-gray-400">Be our first success story!</div>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 italic">"Complete an interview and share your experience to appear here!"</p>
+                    <div class="mt-4 text-accent-cyan">⭐⭐⭐⭐⭐</div>
+                </div>
+            </div>
+        </div>
+    </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 border-t-2 border-accent-cyan/30">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-6">Ready to Ace Your Next Interview?</h2>
+            <p class="text-xl text-gray-300 mb-8">Join thousands of successful candidates using HireWise</p>
+            <a href="auth.html?mode=signup" class="inline-block px-8 py-4 bg-accent-cyan text-white rounded-lg text-lg font-semibold hover:bg-accent-cyan/90 transition transform hover:scale-105">
+                Get Started Free
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t-2 border-accent-cyan/30">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span class="text-2xl font-bold text-accent-cyan">HireWise</span>
+                    </div>
+                    <p class="text-gray-400">AI-powered interview practice platform helping candidates land their dream jobs.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-accent-cyan">Contact</h4>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center gap-2">
+                            <span class="text-accent-cyan">📧</span>
+                            <a href="mailto:pushkargupta993@gmail.com" class="hover:text-accent-cyan transition">pushkargupta993@gmail.com</a>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-accent-cyan">📱</span>
+                            <a href="tel:+918960179834" class="hover:text-accent-cyan transition">+91 8960179834</a>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-accent-cyan">📍</span>
+                            <span>Delhi, India</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-accent-cyan/20 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 HireWise. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/particles.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

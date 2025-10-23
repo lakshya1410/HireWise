@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication - HireWise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/theme.css">
+</head>
+<body class="bg-primary-dark text-white min-h-screen flex items-center justify-center">
+    <!-- Particle Background - Global -->
+    <canvas id="particle-canvas"></canvas>
+    
+    <div class="container mx-auto px-6 py-12">
+        <div class="max-w-md mx-auto">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <a href="index.html" class="inline-flex items-center space-x-2">
+                    <img src="assets/images/logo.svg" alt="HireWise Logo" class="h-10 w-10" onerror="this.style.display='none'">
+                    <span class="text-3xl font-bold text-accent-cyan">HireWise</span>
+                </a>
+            </div>
+
+            <!-- Auth Container -->
+            <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-8">
+                <!-- Tab Navigation -->
+                <div class="flex mb-8 border-b border-accent-cyan/20">
+                    <button id="login-tab" class="flex-1 py-3 font-semibold border-b-2 border-transparent hover:text-accent-cyan transition">
+                        Login
+                    </button>
+                    <button id="signup-tab" class="flex-1 py-3 font-semibold border-b-2 border-transparent hover:text-accent-cyan transition">
+                        Sign Up
+                    </button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="login-email">Email</label>
+                        <input 
+                            type="email" 
+                            id="login-email" 
+                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                            placeholder="your@email.com"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="login-password">Password</label>
+                        <input 
+                            type="password" 
+                            id="login-password" 
+                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                            placeholder="••••••••"
+                            required
+                        >
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="remember-me" class="mr-2 accent-accent-cyan">
+                            <span class="text-sm text-gray-400">Remember me</span>
+                        </label>
+                        <a href="#" class="text-sm text-accent-cyan hover:underline">Forgot Password?</a>
+                    </div>
+
+                    <div id="login-error" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg text-sm"></div>
+
+                    <button 
+                        type="submit" 
+                        class="w-full py-3 bg-accent-cyan text-white rounded-lg font-semibold hover:bg-accent-cyan/90 transition"
+                    >
+                        Login
+                    </button>
+
+                    <p class="text-center text-sm text-gray-400">
+                        Don't have an account? 
+                        <a href="#" id="show-signup" class="text-accent-cyan hover:underline">Sign up</a>
+                    </p>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signup-form" class="space-y-6 hidden">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="signup-fullname">Full Name</label>
+                        <input 
+                            type="text" 
+                            id="signup-fullname" 
+                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                            placeholder="John Doe"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="signup-email">Email</label>
+                        <input 
+                            type="email" 
+                            id="signup-email" 
+                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                            placeholder="your@email.com"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="signup-phone">Phone Number</label>
+                        <input 
+                            type="tel" 
+                            id="signup-phone" 
+                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                            placeholder="+1 (555) 123-4567"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="signup-linkedin">LinkedIn Profile URL (Optional)</label>
+                        <input 
+                            type="url" 
+                            id="signup-linkedin" 
+                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                            placeholder="https://linkedin.com/in/yourprofile"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="signup-resume">Upload Resume (PDF, DOCX) - Optional</label>
+                        <input 
+                            type="file" 
+                            id="signup-resume" 
+                            accept=".pdf,.doc,.docx"
+                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-cyan/20 file:text-accent-cyan hover:file:bg-accent-cyan/30"
+                        >
+                    </div>
+
+                    <!-- Education Details -->
+                    <div class="border-t border-accent-cyan/20 pt-6">
+                        <h3 class="font-semibold mb-4 text-accent-cyan">Education Details</h3>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2" for="signup-degree">Degree</label>
+                                <input 
+                                    type="text" 
+                                    id="signup-degree" 
+                                    class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                                    placeholder="B.Tech"
+                                    required
+                                >
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2" for="signup-field">Field of Study</label>
+                                <input 
+                                    type="text" 
+                                    id="signup-field" 
+                                    class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                                    placeholder="Computer Science"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2" for="signup-university">University</label>
+                            <input 
+                                type="text" 
+                                id="signup-university" 
+                                class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                                placeholder="XYZ University"
+                                required
+                            >
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium mb-2" for="signup-year">Graduation Year</label>
+                            <input 
+                                type="number" 
+                                id="signup-year" 
+                                min="1950" 
+                                max="2030"
+                                class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                                placeholder="2023"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="signup-password">Password</label>
+                        <input 
+                            type="password" 
+                            id="signup-password" 
+                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                            placeholder="••••••••"
+                            minlength="8"
+                            required
+                        >
+                        <p class="text-xs text-gray-400 mt-1">At least 8 characters</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="signup-confirm-password">Confirm Password</label>
+                        <input 
+                            type="password" 
+                            id="signup-confirm-password" 
+                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white"
+                            placeholder="••••••••"
+                            required
+                        >
+                    </div>
+
+                    <div id="signup-error" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg text-sm"></div>
+
+                    <button 
+                        type="submit" 
+                        class="w-full py-3 bg-accent-cyan text-white rounded-lg font-semibold hover:bg-accent-cyan/90 transition"
+                    >
+                        Create Account
+                    </button>
+
+                    <p class="text-center text-sm text-gray-400">
+                        Already have an account? 
+                        <a href="#" id="show-login" class="text-accent-cyan hover:underline">Login</a>
+                    </p>
+                </form>
+            </div>
+
+            <!-- Back to Home -->
+            <div class="text-center mt-6">
+                <a href="index.html" class="text-sm text-gray-400 hover:text-accent-cyan transition">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/particles.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

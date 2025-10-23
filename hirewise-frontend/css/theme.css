@@ -1,0 +1,123 @@
+/* CSS Variables - Color Theme */
+:root {
+    /* Primary Colors */
+    --primary-dark: #0a1128;
+    --primary-dark-secondary: #1a237e;
+    --accent-cyan: #00acc1;
+    --accent-cyan-light: rgba(0, 172, 193, 0.2);
+    
+    /* Neutral Colors */
+    --white: #ffffff;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    
+    /* Status Colors */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --info: #3b82f6;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-base: 200ms ease;
+    --transition-slow: 300ms ease;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    
+    /* Fonts */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    --font-mono: 'Courier New', monospace;
+}
+
+/* Tailwind Color Extensions */
+.bg-primary-dark {
+    background-color: var(--primary-dark);
+}
+
+.bg-primary-dark-secondary {
+    background-color: var(--primary-dark-secondary);
+}
+
+.bg-accent-cyan {
+    background-color: var(--accent-cyan);
+}
+
+.text-accent-cyan {
+    color: var(--accent-cyan);
+}
+
+.border-accent-cyan {
+    border-color: var(--accent-cyan);
+}
+
+.hover\:bg-accent-cyan:hover {
+    background-color: var(--accent-cyan);
+}
+
+.hover\:text-accent-cyan:hover {
+    color: var(--accent-cyan);
+}
+
+.hover\:border-accent-cyan:hover {
+    border-color: var(--accent-cyan);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--primary-dark-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-cyan);
+    border-radius: var(--radius-lg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #008c9e;
+}
+
+/* Selection */
+::selection {
+    background-color: var(--accent-cyan-light);
+    color: var(--white);
+}
+
+/* Focus Styles */
+*:focus {
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 2px;
+}

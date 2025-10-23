@@ -1,0 +1,224 @@
+{
+  "roles": {
+    "software-engineer": [
+      {
+        "id": 1,
+        "question": "Tell me about yourself and your background in software development.",
+        "type": "behavioral",
+        "category": "introduction"
+      },
+      {
+        "id": 2,
+        "question": "What programming languages are you most comfortable with and why?",
+        "type": "technical",
+        "category": "skills"
+      },
+      {
+        "id": 3,
+        "question": "Describe a challenging technical problem you solved recently.",
+        "type": "behavioral",
+        "category": "problem-solving"
+      },
+      {
+        "id": 4,
+        "question": "How do you approach debugging a complex issue in production?",
+        "type": "technical",
+        "category": "problem-solving"
+      },
+      {
+        "id": 5,
+        "question": "Explain the difference between REST and GraphQL APIs.",
+        "type": "technical",
+        "category": "knowledge"
+      },
+      {
+        "id": 6,
+        "question": "Tell me about a time when you had to work with a difficult team member.",
+        "type": "behavioral",
+        "category": "teamwork"
+      },
+      {
+        "id": 7,
+        "question": "How do you stay updated with the latest technology trends?",
+        "type": "behavioral",
+        "category": "learning"
+      },
+      {
+        "id": 8,
+        "question": "What is your experience with version control systems like Git?",
+        "type": "technical",
+        "category": "tools"
+      },
+      {
+        "id": 9,
+        "question": "Describe your approach to writing clean and maintainable code.",
+        "type": "behavioral",
+        "category": "best-practices"
+      },
+      {
+        "id": 10,
+        "question": "Where do you see yourself in 5 years?",
+        "type": "behavioral",
+        "category": "career-goals"
+      }
+    ],
+    "data-scientist": [
+      {
+        "id": 1,
+        "question": "Tell me about your background in data science and analytics.",
+        "type": "behavioral",
+        "category": "introduction"
+      },
+      {
+        "id": 2,
+        "question": "Explain the difference between supervised and unsupervised learning.",
+        "type": "technical",
+        "category": "knowledge"
+      },
+      {
+        "id": 3,
+        "question": "Walk me through a data science project you've completed from start to finish.",
+        "type": "behavioral",
+        "category": "experience"
+      },
+      {
+        "id": 4,
+        "question": "How do you handle missing data in a dataset?",
+        "type": "technical",
+        "category": "data-preparation"
+      },
+      {
+        "id": 5,
+        "question": "What's your experience with Python libraries like Pandas, NumPy, and Scikit-learn?",
+        "type": "technical",
+        "category": "tools"
+      }
+    ],
+    "product-manager": [
+      {
+        "id": 1,
+        "question": "Tell me about your experience in product management.",
+        "type": "behavioral",
+        "category": "introduction"
+      },
+      {
+        "id": 2,
+        "question": "How do you prioritize features in a product roadmap?",
+        "type": "behavioral",
+        "category": "strategy"
+      },
+      {
+        "id": 3,
+        "question": "Describe a time when you had to make a difficult product decision.",
+        "type": "behavioral",
+        "category": "decision-making"
+      },
+      {
+        "id": 4,
+        "question": "How do you gather and incorporate user feedback into product development?",
+        "type": "behavioral",
+        "category": "user-research"
+      },
+      {
+        "id": 5,
+        "question": "What metrics do you use to measure product success?",
+        "type": "technical",
+        "category": "analytics"
+      }
+    ],
+    "marketing": [
+      {
+        "id": 1,
+        "question": "Tell me about your marketing experience and expertise.",
+        "type": "behavioral",
+        "category": "introduction"
+      },
+      {
+        "id": 2,
+        "question": "Describe a successful marketing campaign you've led.",
+        "type": "behavioral",
+        "category": "experience"
+      },
+      {
+        "id": 3,
+        "question": "How do you measure ROI on marketing campaigns?",
+        "type": "technical",
+        "category": "analytics"
+      },
+      {
+        "id": 4,
+        "question": "What's your experience with digital marketing channels?",
+        "type": "behavioral",
+        "category": "skills"
+      },
+      {
+        "id": 5,
+        "question": "How do you stay current with marketing trends?",
+        "type": "behavioral",
+        "category": "learning"
+      }
+    ],
+    "general": [
+      {
+        "id": 1,
+        "question": "Tell me about yourself.",
+        "type": "behavioral",
+        "category": "introduction"
+      },
+      {
+        "id": 2,
+        "question": "What are your greatest strengths?",
+        "type": "behavioral",
+        "category": "self-assessment"
+      },
+      {
+        "id": 3,
+        "question": "What is your biggest weakness?",
+        "type": "behavioral",
+        "category": "self-assessment"
+      },
+      {
+        "id": 4,
+        "question": "Why do you want to work for our company?",
+        "type": "behavioral",
+        "category": "motivation"
+      },
+      {
+        "id": 5,
+        "question": "Describe a time when you faced a challenge at work and how you overcame it.",
+        "type": "behavioral",
+        "category": "problem-solving"
+      },
+      {
+        "id": 6,
+        "question": "How do you handle stress and pressure?",
+        "type": "behavioral",
+        "category": "work-style"
+      },
+      {
+        "id": 7,
+        "question": "Tell me about a time you showed leadership.",
+        "type": "behavioral",
+        "category": "leadership"
+      },
+      {
+        "id": 8,
+        "question": "What motivates you in your career?",
+        "type": "behavioral",
+        "category": "motivation"
+      },
+      {
+        "id": 9,
+        "question": "How do you prioritize your work?",
+        "type": "behavioral",
+        "category": "work-style"
+      },
+      {
+        "id": 10,
+        "question": "Where do you see yourself in 5 years?",
+        "type": "behavioral",
+        "category": "career-goals"
+      }
+    ]
+  }
+}

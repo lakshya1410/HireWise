@@ -1,0 +1,256 @@
+/* Authentication Page Styles */
+
+/* Auth Container */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-dark-secondary) 100%);
+}
+
+/* Tab Navigation */
+#login-tab.active,
+#signup-tab.active {
+    border-bottom-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+/* Form Styles */
+form input,
+form textarea,
+form select {
+    transition: border-color var(--transition-fast);
+}
+
+form input:focus,
+form textarea:focus,
+form select:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px var(--accent-cyan-light);
+}
+
+form input::placeholder,
+form textarea::placeholder {
+    color: var(--gray-400);
+}
+
+/* File Input Styling */
+input[type="file"] {
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+    margin-right: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--accent-cyan-light);
+    color: var(--accent-cyan);
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+input[type="file"]::file-selector-button:hover {
+    background-color: var(--accent-cyan);
+    color: var(--white);
+}
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+    accent-color: var(--accent-cyan);
+}
+
+/* Error Messages */
+#login-error,
+#signup-error {
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* Success Message */
+.success-message {
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--success);
+    color: var(--success);
+    padding: 0.75rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+    animation: slide-up 0.3s ease;
+}
+
+/* Loading State */
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+button.loading {
+    position: relative;
+    color: transparent;
+}
+
+button.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid var(--white);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    height: 4px;
+    background-color: var(--primary-dark);
+    border-radius: var(--radius-lg);
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-strength-bar.weak {
+    width: 33%;
+    background-color: var(--error);
+}
+
+.password-strength-bar.medium {
+    width: 66%;
+    background-color: var(--warning);
+}
+
+.password-strength-bar.strong {
+    width: 100%;
+    background-color: var(--success);
+}
+
+/* Form Validation */
+input:invalid:not(:placeholder-shown) {
+    border-color: var(--error);
+}
+
+input:valid:not(:placeholder-shown) {
+    border-color: var(--success);
+}
+
+.field-error {
+    color: var(--error);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+input:invalid:not(:placeholder-shown) + .field-error {
+    display: block;
+}
+
+/* Social Login Buttons */
+.social-login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.social-login-divider::before,
+.social-login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--accent-cyan-light);
+}
+
+.social-login-divider span {
+    padding: 0 1rem;
+    color: var(--gray-400);
+    font-size: 0.875rem;
+}
+
+.social-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--primary-dark);
+    border: 1px solid var(--accent-cyan-light);
+    border-radius: var(--radius-lg);
+    color: var(--white);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.social-btn:hover {
+    background-color: var(--accent-cyan-light);
+    border-color: var(--accent-cyan);
+}
+
+.social-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .auth-container {
+        padding: 1rem;
+    }
+    
+    form {
+        font-size: 0.875rem;
+    }
+}
+
+/* Animation for form transitions */
+form {
+    animation: fade-in 0.3s ease;
+}
+
+/* Back to home link */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gray-400);
+    transition: color var(--transition-fast);
+}
+
+.back-link:hover {
+    color: var(--accent-cyan);
+}
+
+/* Terms and Privacy */
+.terms-privacy {
+    font-size: 0.75rem;
+    color: var(--gray-400);
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.terms-privacy a {
+    color: var(--accent-cyan);
+    text-decoration: underline;
+}
+
+.terms-privacy a:hover {
+    color: #008c9e;
+}

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - HireWise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/theme.css">
+</head>
+<body class="bg-primary-dark text-white">
+    <!-- Particle Background - Global -->
+    <canvas id="particle-canvas"></canvas>
+    
+    <!-- Top Navigation -->
+    <nav class="fixed w-full top-0 z-50 bg-primary-dark-secondary/40 backdrop-blur-md border-b border-accent-cyan/20">
+        <div class="px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <img src="assets/images/logo.svg" alt="HireWise Logo" class="h-8 w-8" onerror="this.style.display='none'">
+                    <span class="text-2xl font-bold text-accent-cyan">HireWise</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-400">
+                        <span>🔥 Streak: <span id="streak-count" class="text-accent-cyan font-bold">0</span> days</span>
+                        <span class="ml-4">⭐ Points: <span id="points-count" class="text-accent-cyan font-bold">0</span></span>
+                    </div>
+                    <div class="relative">
+                        <button id="profile-menu-btn" class="flex items-center space-x-2 hover:bg-accent-cyan/10 px-4 py-2 rounded-lg transition">
+                            <div class="w-8 h-8 bg-accent-cyan/20 rounded-full flex items-center justify-center">
+                                <span id="user-avatar" class="text-sm font-bold">U</span>
+                            </div>
+                            <span id="user-name" class="text-sm">User</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="profile-menu" class="hidden absolute right-0 mt-2 w-48 bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg shadow-lg">
+                            <a href="#" class="block px-4 py-3 hover:bg-accent-cyan/10 transition">Profile</a>
+                            <a href="#" class="block px-4 py-3 hover:bg-accent-cyan/10 transition">Settings</a>
+                            <a href="#" id="logout-btn" class="block px-4 py-3 hover:bg-accent-cyan/10 transition text-red-400">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex pt-16">
+        <!-- Left Sidebar -->
+        <aside class="fixed left-0 w-64 h-full bg-primary-dark-secondary/40 backdrop-blur-md border-r border-accent-cyan/20 overflow-y-auto">
+            <nav class="p-4 space-y-2">
+                <a href="#" data-view="dashboard" class="nav-item active flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-accent-cyan/10 transition">
+                    <span>📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" data-view="resume" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-accent-cyan/10 transition">
+                    <span>📝</span>
+                    <span>View Resume</span>
+                </a>
+                <a href="#" data-view="ats" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-accent-cyan/10 transition">
+                    <span>✅</span>
+                    <span>ATS Checker</span>
+                </a>
+                <a href="#" data-view="jdmatcher" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-accent-cyan/10 transition">
+                    <span>🎯</span>
+                    <span>JD Matcher</span>
+                </a>
+                <a href="#" data-view="interview" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-accent-cyan/10 transition">
+                    <span>🎤</span>
+                    <span>Take Interview</span>
+                </a>
+                <a href="#" data-view="jobs" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-accent-cyan/10 transition">
+                    <span>💼</span>
+                    <span>Job Discovery</span>
+                </a>
+                <a href="#" data-view="settings" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-accent-cyan/10 transition">
+                    <span>⚙️</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="ml-64 flex-1 p-8">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view-content">
+                <h1 class="text-3xl font-bold mb-6">Performance Dashboard</h1>
+                
+                <div class="grid lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Stats Cards -->
+                    <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6 stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Total Interviews</p>
+                                <p class="text-3xl font-bold text-accent-cyan" id="total-interviews">0</p>
+                            </div>
+                            <div class="text-4xl">🎤</div>
+                        </div>
+                    </div>
+                    <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6 stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Average Score</p>
+                                <p class="text-3xl font-bold text-accent-cyan" id="avg-score">0</p>
+                            </div>
+                            <div class="text-4xl">⭐</div>
+                        </div>
+                    </div>
+                    <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6 stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Practice Streak</p>
+                                <p class="text-3xl font-bold text-accent-cyan" id="streak-display">0 days</p>
+                            </div>
+                            <div class="text-4xl">🔥</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <!-- Calendar -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6">
+                            <h2 class="text-xl font-bold mb-4">Interview Calendar</h2>
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6">
+                        <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
+                        <div id="recent-activity" class="space-y-4">
+                            <p class="text-gray-400 text-sm">No recent activity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Chart -->
+                <div class="mt-6 bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Performance Trend</h2>
+                    <canvas id="performance-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Other Views (Hidden by default) -->
+            <div id="resume-view" class="view-content hidden">
+                <h1 class="text-3xl font-bold mb-6">My Resume</h1>
+                <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
+                    <div id="resume-preview" class="text-center py-12">
+                        <p class="text-gray-400">No resume uploaded yet</p>
+                        <button class="mt-4 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                            Upload Resume
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ats-view" class="view-content hidden">
+                <h1 class="text-3xl font-bold mb-6">ATS Compatibility Checker</h1>
+                <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
+                    <button id="open-ats-modal" class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                        Check Resume ATS Score
+                    </button>
+                </div>
+            </div>
+
+            <div id="jdmatcher-view" class="view-content hidden">
+                <h1 class="text-3xl font-bold mb-6">Job Description Matcher</h1>
+                <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
+                    <button id="open-jd-modal" class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                        Match with Job Description
+                    </button>
+                </div>
+            </div>
+
+            <div id="interview-view" class="view-content hidden">
+                <h1 class="text-3xl font-bold mb-6">Take Mock Interview</h1>
+                <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
+                    <button id="open-interview-modal" class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                        Start New Interview
+                    </button>
+                </div>
+            </div>
+
+            <div id="jobs-view" class="view-content hidden">
+                <h1 class="text-3xl font-bold mb-6">Job Discovery</h1>
+                <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
+                    <p class="text-gray-400">Job discovery feature coming soon...</p>
+                </div>
+            </div>
+
+            <div id="settings-view" class="view-content hidden">
+                <h1 class="text-3xl font-bold mb-6">Settings</h1>
+                <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
+                    <p class="text-gray-400">Settings page coming soon...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals Container -->
+    <div id="modals-container"></div>
+
+    <script src="js/particles.js"></script>
+    <script src="data/config.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/interview.js"></script>
+    <script src="js/jdmatcher.js"></script>
+    <script src="js/ats-checker.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
