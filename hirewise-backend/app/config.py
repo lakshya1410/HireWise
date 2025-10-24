@@ -2,8 +2,9 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 
 class Settings(BaseSettings):
-    # Database
-    database_url: str = "sqlite:///./hirewise.db"
+    # MongoDB Database
+    mongodb_url: str = "mongodb://localhost:27017"
+    mongodb_db_name: str = "hirewise"
     
     # Google Gemini
     gemini_api_key: str

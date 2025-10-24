@@ -98,26 +98,144 @@ const API = {
     // User Profile
     async getProfile() {
         const user = Storage.getUser();
-        if (!user) {
+        if (!user || !user.userId) {
             return {
                 success: false,
                 message: 'User not found'
             };
         }
         
-        return {
-            success: true,
-            data: user
-        };
+        try {
+            const response = await fetch(`${this.baseURL}/auth/profile/${user.userId}`);
+            return await this.handleResponse(response);
+        } catch (error) {
+            return this.handleError(error);
+        }
     },
 
     async updateProfile(updates) {
-        const success = Storage.updateUser(updates);
-        return {
-            success,
-            data: Storage.getUser(),
-            message: success ? 'Profile updated' : 'Update failed'
-        };
+        const user = Storage.getUser();
+        if (!user || !user.userId) {
+            return {
+                success: false,
+                message: 'User not found'
+            };
+        }
+        
+        try {
+            const response = await fetch(`${this.baseURL}/auth/profile/${user.userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    full_name: updates.fullName,
+                    phone: updates.phone,
+                    education: updates.education
+                })
+            });
+            
+            const result = await this.handleResponse(response);
+            
+            // Update localStorage with new data
+            if (result.success && result.data) {
+                Storage.updateUser(result.data);
+            }
+            
+            return result;
+        } catch (error) {
+            return this.handleError(error);
+        }
+    },
+
+    // Resume Management
+    async getUserResumes() {
+        const user = Storage.getUser();
+        if (!user || !user.userId) {
+            return {
+                success: false,
+                message: 'User not found'
+            };
+        }
+        
+        try {
+            const response = await fetch(`${this.baseURL}/ats/resumes/${user.userId}`);
+            return await this.handleResponse(response);
+        } catch (error) {
+            return this.handleError(error);
+        }
+    },
+
+    async getResumeFile(resumeId) {
+        try {
+            const response = await fetch(`${this.baseURL}/ats/resumes/file/${resumeId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch resume file');
+            }
+            return await response.blob();
+        } catch (error) {
+            console.error('Error fetching resume file:', error);
+            return null;
+        }
+    },
+
+    async checkATSStored(resumeId) {
+        const user = Storage.getUser();
+        
+        try {
+            const formData = new FormData();
+            formData.append('resume_id', resumeId);
+            
+            if (user?.userId) {
+                formData.append('user_id', user.userId);
+            }
+            
+            const response = await fetch(`${this.baseURL}/ats/analyze-stored`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await this.handleResponse(response);
+            
+            // Save ATS result to localStorage
+            if (result.success && result.data) {
+                Storage.saveATSResult(result.data);
+            }
+            
+            return result;
+        } catch (error) {
+            return this.handleError(error);
+        }
+    },
+
+    async analyzeJDMatchStored(resumeId, jobDescription) {
+        const user = Storage.getUser();
+        
+        try {
+            const formData = new FormData();
+            formData.append('resume_id', resumeId);
+            formData.append('job_description', jobDescription);
+            
+            if (user?.userId) {
+                formData.append('user_id', user.userId);
+            }
+            
+            const response = await fetch(`${this.baseURL}/jd-matcher/analyze-stored`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await this.handleResponse(response);
+            
+            // Save match data to localStorage
+            if (result.success && result.data) {
+                Storage.saveJDMatch(result.data);
+            }
+            
+            return result;
+        } catch (error) {
+            return this.handleError(error);
+        }
     },
 
     // Interviews

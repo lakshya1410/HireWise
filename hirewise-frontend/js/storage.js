@@ -37,6 +37,8 @@ const Storage = {
     // Session Management
     setSession(token) {
         localStorage.setItem('hirewise_session', token);
+        // Also set a timestamp for session tracking
+        localStorage.setItem('hirewise_session_time', Date.now().toString());
     },
 
     getSession() {
@@ -45,6 +47,8 @@ const Storage = {
 
     clearSession() {
         localStorage.removeItem('hirewise_session');
+        localStorage.removeItem('hirewise_session_time');
+        this.clearUser();
     },
 
     isAuthenticated() {

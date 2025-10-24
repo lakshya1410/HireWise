@@ -21,7 +21,7 @@ A comprehensive web application that helps job seekers prepare for interviews wi
 
 ### Backend
 - FastAPI (Python web framework)
-- SQLAlchemy ORM with SQLite
+- **MongoDB with Motor** (async MongoDB driver)
 - Google Gemini AI for intelligent analysis
 - PyPDF2 & pdfplumber for PDF processing
 - python-docx for report generation
@@ -59,34 +59,55 @@ new_hirewise/
 
 ### Prerequisites
 - Python 3.11+
+- MongoDB (Local installation OR MongoDB Atlas cloud account)
 - Google Gemini API Key ([Get one here](https://makersuite.google.com/app/apikey))
 
 ### Backend Setup
 
-1. **Navigate to backend directory:**
+1. **Install MongoDB:**
+   - **Local**: Download from [MongoDB Community Server](https://www.mongodb.com/try/download/community)
+   - **Cloud**: Sign up for [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) (free tier available)
+
+2. **Navigate to backend directory:**
    ```bash
    cd hirewise-backend
    ```
 
-2. **Install dependencies:**
+3. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    python -m spacy download en_core_web_sm
    ```
 
-3. **Configure environment:**
+4. **Configure environment:**
    Create a `.env` file with:
    ```env
-   DATABASE_URL=sqlite:///./hirewise.db
+   # MongoDB (Local)
+   MONGODB_URL=mongodb://localhost:27017
+   MONGODB_DB_NAME=hirewise
+   
+   # OR MongoDB Atlas (Cloud)
+   # MONGODB_URL=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
+   # MONGODB_DB_NAME=hirewise
+   
+   # Google Gemini API
    GEMINI_API_KEY=your-gemini-api-key-here
+   
+   # Frontend URL
    FRONTEND_URL=http://localhost:8000
+   
+   # File Upload
    MAX_UPLOAD_SIZE=5242880
    UPLOAD_DIR=./uploads
    REPORTS_DIR=./reports
    ```
 
-4. **Start the backend server:**
+5. **Start the backend server:**
    ```bash
+   # Windows
+   start_server.bat
+   
+   # OR manually
    uvicorn app.main:app --reload --port 8001
    ```
 

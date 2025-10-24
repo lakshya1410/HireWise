@@ -1,12 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
+from app.database import connect_to_mongo, close_mongo_connection
 from app.config import settings
 from app.api import auth, ats, jd_matcher, feedback
 import os
-
-# Create database tables
-Base.metadata.create_all(bind=engine)
 
 # Ensure directories exist
 os.makedirs(settings.upload_dir, exist_ok=True)
@@ -19,14 +16,25 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - MUST be before routes
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url, "http://localhost:8000"],
+    allow_origins=["*"],  # Allow all origins for development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Startup and shutdown events
+@app.on_event("startup")
+async def startup_event():
+    await connect_to_mongo()
+    print("Application started successfully")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await close_mongo_connection()
+    print("Application shutdown")
 
 # Include routers
 app.include_router(auth.router)

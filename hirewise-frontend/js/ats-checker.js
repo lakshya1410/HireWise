@@ -24,12 +24,36 @@ class ATSChecker {
                         </div>
                         
                         <div class="space-y-6">
-                            <div>
-                                <label class="block text-sm font-medium mb-2">Upload Resume</label>
-                                <input type="file" 
-                                       id="ats-resume-file"
-                                       accept=".pdf,.doc,.docx"
-                                       class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-cyan/20 file:text-accent-cyan hover:file:bg-accent-cyan/30">
+                            <!-- Resume Selection Tabs -->
+                            <div class="flex gap-4 border-b border-accent-cyan/20">
+                                <button id="upload-new-tab" class="px-4 py-2 border-b-2 border-accent-cyan text-accent-cyan font-semibold" onclick="ATSChecker.instance.switchTab('upload')">
+                                    Upload New
+                                </button>
+                                <button id="use-stored-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-accent-cyan" onclick="ATSChecker.instance.switchTab('stored')">
+                                    Use Stored Resume
+                                </button>
+                            </div>
+                            
+                            <!-- Upload New Tab -->
+                            <div id="upload-new-content">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Upload Resume</label>
+                                    <input type="file" 
+                                           id="ats-resume-file"
+                                           accept=".pdf,.doc,.docx"
+                                           class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-cyan/20 file:text-accent-cyan hover:file:bg-accent-cyan/30">
+                                </div>
+                            </div>
+                            
+                            <!-- Stored Resume Tab -->
+                            <div id="use-stored-content" class="hidden">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Select Resume</label>
+                                    <select id="stored-resume-select" 
+                                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white">
+                                        <option value="">Loading resumes...</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             <div class="bg-accent-cyan/10 border border-accent-cyan/30 rounded-lg p-4">
@@ -40,10 +64,6 @@ class ATSChecker {
                             </div>
                             
                             <div class="flex gap-4">
-                                <button onclick="ATSChecker.instance.useStoredResume()" 
-                                        class="flex-1 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
-                                    Use Stored Resume
-                                </button>
                                 <button onclick="ATSChecker.instance.checkATS()" 
                                         class="flex-1 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
                                     Check ATS Score
@@ -60,52 +80,121 @@ class ATSChecker {
         `;
         
         document.body.appendChild(modal);
+        
+        // Load stored resumes
+        this.loadStoredResumes();
+    }
+
+    switchTab(tab) {
+        const uploadTab = document.getElementById('upload-new-tab');
+        const storedTab = document.getElementById('use-stored-tab');
+        const uploadContent = document.getElementById('upload-new-content');
+        const storedContent = document.getElementById('use-stored-content');
+        
+        if (tab === 'upload') {
+            uploadTab.classList.add('border-accent-cyan', 'text-accent-cyan', 'font-semibold');
+            uploadTab.classList.remove('border-transparent', 'text-gray-400');
+            storedTab.classList.remove('border-accent-cyan', 'text-accent-cyan', 'font-semibold');
+            storedTab.classList.add('border-transparent', 'text-gray-400');
+            uploadContent.classList.remove('hidden');
+            storedContent.classList.add('hidden');
+        } else {
+            storedTab.classList.add('border-accent-cyan', 'text-accent-cyan', 'font-semibold');
+            storedTab.classList.remove('border-transparent', 'text-gray-400');
+            uploadTab.classList.remove('border-accent-cyan', 'text-accent-cyan', 'font-semibold');
+            uploadTab.classList.add('border-transparent', 'text-gray-400');
+            storedContent.classList.remove('hidden');
+            uploadContent.classList.add('hidden');
+        }
+    }
+
+    async loadStoredResumes() {
+        const select = document.getElementById('stored-resume-select');
+        if (!select) return;
+        
+        const response = await API.getUserResumes();
+        
+        if (response.success && response.data && response.data.length > 0) {
+            select.innerHTML = '<option value="">-- Select a resume --</option>' +
+                response.data.map(resume => 
+                    `<option value="${resume.resumeId}">${resume.fileName} (${new Date(resume.uploadedAt).toLocaleDateString()})</option>`
+                ).join('');
+        } else {
+            select.innerHTML = '<option value="">No resumes found. Please upload one first.</option>';
+        }
     }
 
     async checkATS() {
-        const fileInput = document.getElementById('ats-resume-file');
-        const file = fileInput?.files[0];
+        const uploadContent = document.getElementById('upload-new-content');
+        const storedContent = document.getElementById('use-stored-content');
         
-        if (!file) {
-            showNotification('Please upload a resume file', 'warning');
-            return;
-        }
+        let response;
         
-        // Show loading
-        const inputSection = document.getElementById('ats-input-section');
-        inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing resume...</p></div>';
-        
-        try {
-            // Pass the actual File object to the API
-            const response = await API.checkATS(file);
+        // Check which tab is active
+        if (!uploadContent.classList.contains('hidden')) {
+            // Upload new resume
+            const fileInput = document.getElementById('ats-resume-file');
+            const file = fileInput?.files[0];
             
-            if (response.success) {
-                this.currentResult = response.data;
-                this.showResults();
-            } else {
-                inputSection.innerHTML = `
-                    <div class="text-center py-12">
-                        <p class="text-red-500 mb-4">❌ ${response.message}</p>
-                        <button onclick="ATSChecker.instance.reset()" 
-                                class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
-                            Try Again
-                        </button>
-                    </div>
-                `;
+            if (!file) {
+                showNotification('Please upload a resume file', 'warning');
+                return;
             }
-        } catch (error) {
-            console.error('Error checking ATS:', error);
-            showNotification('Error analyzing resume', 'error');
-            inputSection.innerHTML = `
-                <div class="text-center py-12">
-                    <p class="text-red-500 mb-4">❌ Failed to analyze resume. Please check your internet connection and backend server.</p>
-                    <button onclick="ATSChecker.instance.reset()" 
-                            class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
-                        Try Again
-                    </button>
-                </div>
-            `;
+            
+            // Show loading
+            const inputSection = document.getElementById('ats-input-section');
+            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing resume...</p></div>';
+            
+            try {
+                response = await API.checkATS(file);
+            } catch (error) {
+                console.error('Error checking ATS:', error);
+                this.showError('Failed to analyze resume. Please check your internet connection and backend server.');
+                return;
+            }
+        } else {
+            // Use stored resume
+            const select = document.getElementById('stored-resume-select');
+            const resumeId = select?.value;
+            
+            if (!resumeId) {
+                showNotification('Please select a resume', 'warning');
+                return;
+            }
+            
+            // Show loading
+            const inputSection = document.getElementById('ats-input-section');
+            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing stored resume...</p></div>';
+            
+            try {
+                response = await API.checkATSStored(resumeId);
+            } catch (error) {
+                console.error('Error checking ATS:', error);
+                this.showError('Failed to analyze resume. Please try again.');
+                return;
+            }
         }
+        
+        // Handle response
+        if (response.success) {
+            this.currentResult = response.data;
+            this.showResults();
+        } else {
+            this.showError(response.message || 'Failed to analyze resume');
+        }
+    }
+
+    showError(message) {
+        const inputSection = document.getElementById('ats-input-section');
+        inputSection.innerHTML = `
+            <div class="text-center py-12">
+                <p class="text-red-500 mb-4">❌ ${message}</p>
+                <button onclick="ATSChecker.instance.reset()" 
+                        class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                    Try Again
+                </button>
+            </div>
+        `;
     }
 
     async useStoredResume() {
@@ -242,12 +331,36 @@ class ATSChecker {
             </div>
             
             <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium mb-2">Upload Resume</label>
-                    <input type="file" 
-                           id="ats-resume-file"
-                           accept=".pdf,.doc,.docx"
-                           class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-cyan/20 file:text-accent-cyan hover:file:bg-accent-cyan/30">
+                <!-- Resume Selection Tabs -->
+                <div class="flex gap-4 border-b border-accent-cyan/20">
+                    <button id="upload-new-tab" class="px-4 py-2 border-b-2 border-accent-cyan text-accent-cyan font-semibold" onclick="ATSChecker.instance.switchTab('upload')">
+                        Upload New
+                    </button>
+                    <button id="use-stored-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-accent-cyan" onclick="ATSChecker.instance.switchTab('stored')">
+                        Use Stored Resume
+                    </button>
+                </div>
+                
+                <!-- Upload New Tab -->
+                <div id="upload-new-content">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Upload Resume</label>
+                        <input type="file" 
+                               id="ats-resume-file"
+                               accept=".pdf,.doc,.docx"
+                               class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-cyan/20 file:text-accent-cyan hover:file:bg-accent-cyan/30">
+                    </div>
+                </div>
+                
+                <!-- Stored Resume Tab -->
+                <div id="use-stored-content" class="hidden">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Select Resume</label>
+                        <select id="stored-resume-select" 
+                                class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white">
+                            <option value="">Loading resumes...</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="bg-accent-cyan/10 border border-accent-cyan/30 rounded-lg p-4">
@@ -258,10 +371,6 @@ class ATSChecker {
                 </div>
                 
                 <div class="flex gap-4">
-                    <button onclick="ATSChecker.instance.useStoredResume()" 
-                            class="flex-1 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
-                        Use Stored Resume
-                    </button>
                     <button onclick="ATSChecker.instance.checkATS()" 
                             class="flex-1 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
                         Check ATS Score
@@ -271,6 +380,7 @@ class ATSChecker {
         `;
         
         this.currentResult = null;
+        this.loadStoredResumes();
     }
 
     downloadReport() {

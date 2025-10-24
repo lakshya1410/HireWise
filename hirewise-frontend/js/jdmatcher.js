@@ -18,12 +18,33 @@ class JDMatcher {
                 <div class="modal-body">
                     <div id="jd-input-section">
                         <div class="space-y-6">
+                            <!-- Resume Selection Tabs -->
                             <div>
-                                <label class="block text-sm font-medium mb-2">Upload Your Resume</label>
-                                <input type="file" 
-                                       id="resume-upload-jd"
-                                       accept=".pdf,.doc,.docx"
-                                       class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-cyan/20 file:text-accent-cyan hover:file:bg-accent-cyan/30">
+                                <label class="block text-sm font-medium mb-2">Resume</label>
+                                <div class="flex gap-4 border-b border-accent-cyan/20 mb-4">
+                                    <button id="jd-upload-new-tab" class="px-4 py-2 border-b-2 border-accent-cyan text-accent-cyan font-semibold" onclick="JDMatcher.instance.switchTab('upload')">
+                                        Upload New
+                                    </button>
+                                    <button id="jd-use-stored-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-accent-cyan" onclick="JDMatcher.instance.switchTab('stored')">
+                                        Use Stored Resume
+                                    </button>
+                                </div>
+                                
+                                <!-- Upload New Tab -->
+                                <div id="jd-upload-new-content">
+                                    <input type="file" 
+                                           id="resume-upload-jd"
+                                           accept=".pdf,.doc,.docx"
+                                           class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-cyan/20 file:text-accent-cyan hover:file:bg-accent-cyan/30">
+                                </div>
+                                
+                                <!-- Stored Resume Tab -->
+                                <div id="jd-use-stored-content" class="hidden">
+                                    <select id="jd-stored-resume-select" 
+                                            class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white">
+                                        <option value="">Loading resumes...</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             <div>
@@ -55,57 +76,127 @@ class JDMatcher {
         `;
         
         document.body.appendChild(modal);
+        
+        // Load stored resumes
+        this.loadStoredResumes();
+    }
+
+    switchTab(tab) {
+        const uploadTab = document.getElementById('jd-upload-new-tab');
+        const storedTab = document.getElementById('jd-use-stored-tab');
+        const uploadContent = document.getElementById('jd-upload-new-content');
+        const storedContent = document.getElementById('jd-use-stored-content');
+        
+        if (tab === 'upload') {
+            uploadTab.classList.add('border-accent-cyan', 'text-accent-cyan', 'font-semibold');
+            uploadTab.classList.remove('border-transparent', 'text-gray-400');
+            storedTab.classList.remove('border-accent-cyan', 'text-accent-cyan', 'font-semibold');
+            storedTab.classList.add('border-transparent', 'text-gray-400');
+            uploadContent.classList.remove('hidden');
+            storedContent.classList.add('hidden');
+        } else {
+            storedTab.classList.add('border-accent-cyan', 'text-accent-cyan', 'font-semibold');
+            storedTab.classList.remove('border-transparent', 'text-gray-400');
+            uploadTab.classList.remove('border-accent-cyan', 'text-accent-cyan', 'font-semibold');
+            uploadTab.classList.add('border-transparent', 'text-gray-400');
+            storedContent.classList.remove('hidden');
+            uploadContent.classList.add('hidden');
+        }
+    }
+
+    async loadStoredResumes() {
+        const select = document.getElementById('jd-stored-resume-select');
+        if (!select) return;
+        
+        const response = await API.getUserResumes();
+        
+        if (response.success && response.data && response.data.length > 0) {
+            select.innerHTML = '<option value="">-- Select a resume --</option>' +
+                response.data.map(resume => 
+                    `<option value="${resume.resumeId}">${resume.fileName} (${new Date(resume.uploadedAt).toLocaleDateString()})</option>`
+                ).join('');
+        } else {
+            select.innerHTML = '<option value="">No resumes found. Please upload one first.</option>';
+        }
     }
 
     async analyzeMatch() {
         const jdText = document.getElementById('jd-text').value;
-        const resumeFile = document.getElementById('resume-upload-jd')?.files[0];
         
         if (!jdText) {
             showNotification('Please provide a job description', 'warning');
             return;
         }
         
-        if (!resumeFile) {
-            showNotification('Please upload your resume', 'warning');
-            return;
-        }
+        const uploadContent = document.getElementById('jd-upload-new-content');
+        const storedContent = document.getElementById('jd-use-stored-content');
         
-        // Show loading
-        const inputSection = document.getElementById('jd-input-section');
-        inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing match...</p></div>';
+        let response;
         
-        try {
-            // Pass the actual File object to the API
-            const response = await API.analyzeJDMatch(resumeFile, jdText);
+        // Check which tab is active
+        if (!uploadContent.classList.contains('hidden')) {
+            // Upload new resume
+            const resumeFile = document.getElementById('resume-upload-jd')?.files[0];
             
-            if (response.success) {
-                this.currentMatch = response.data;
-                this.showResults();
-            } else {
-                inputSection.innerHTML = `
-                    <div class="text-center py-12">
-                        <p class="text-red-500 mb-4">❌ ${response.message}</p>
-                        <button onclick="JDMatcher.instance.reset()" 
-                                class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
-                            Try Again
-                        </button>
-                    </div>
-                `;
+            if (!resumeFile) {
+                showNotification('Please upload your resume', 'warning');
+                return;
             }
-        } catch (error) {
-            console.error('Error analyzing match:', error);
-            showNotification('Error analyzing job match', 'error');
-            inputSection.innerHTML = `
-                <div class="text-center py-12">
-                    <p class="text-red-500 mb-4">❌ Failed to analyze match. Please check your internet connection and backend server.</p>
-                    <button onclick="JDMatcher.instance.reset()" 
-                            class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
-                        Try Again
-                    </button>
-                </div>
-            `;
+            
+            // Show loading
+            const inputSection = document.getElementById('jd-input-section');
+            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing match...</p></div>';
+            
+            try {
+                response = await API.analyzeJDMatch(resumeFile, jdText);
+            } catch (error) {
+                console.error('Error analyzing match:', error);
+                this.showError('Failed to analyze match. Please check your connection.');
+                return;
+            }
+        } else {
+            // Use stored resume
+            const select = document.getElementById('jd-stored-resume-select');
+            const resumeId = select?.value;
+            
+            if (!resumeId) {
+                showNotification('Please select a resume', 'warning');
+                return;
+            }
+            
+            // Show loading
+            const inputSection = document.getElementById('jd-input-section');
+            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing stored resume...</p></div>';
+            
+            try {
+                response = await API.analyzeJDMatchStored(resumeId, jdText);
+            } catch (error) {
+                console.error('Error analyzing match:', error);
+                this.showError('Failed to analyze match. Please try again.');
+                return;
+            }
         }
+        
+        // Handle response
+        if (response.success) {
+            this.currentMatch = response.data;
+            this.showResults();
+        } else {
+            this.showError(response.message || 'Failed to analyze match');
+        }
+    }
+
+    showError(message) {
+        const inputSection = document.getElementById('jd-input-section');
+        inputSection.innerHTML = `
+            <div class="text-center py-12">
+                <p class="text-red-500 mb-4">❌ ${message}</p>
+                <button onclick="JDMatcher.instance.reset()" 
+                        class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                    Try Again
+                </button>
+            </div>
+        `;
     }
 
     showResults() {
@@ -226,12 +317,33 @@ class JDMatcher {
         // Recreate input section with resume upload
         inputSection.innerHTML = `
             <div class="space-y-6">
+                <!-- Resume Selection Tabs -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">Upload Your Resume</label>
-                    <input type="file" 
-                           id="resume-upload-jd"
-                           accept=".pdf,.doc,.docx"
-                           class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-cyan/20 file:text-accent-cyan hover:file:bg-accent-cyan/30">
+                    <label class="block text-sm font-medium mb-2">Resume</label>
+                    <div class="flex gap-4 border-b border-accent-cyan/20 mb-4">
+                        <button id="jd-upload-new-tab" class="px-4 py-2 border-b-2 border-accent-cyan text-accent-cyan font-semibold" onclick="JDMatcher.instance.switchTab('upload')">
+                            Upload New
+                        </button>
+                        <button id="jd-use-stored-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-accent-cyan" onclick="JDMatcher.instance.switchTab('stored')">
+                            Use Stored Resume
+                        </button>
+                    </div>
+                    
+                    <!-- Upload New Tab -->
+                    <div id="jd-upload-new-content">
+                        <input type="file" 
+                               id="resume-upload-jd"
+                               accept=".pdf,.doc,.docx"
+                               class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-accent-cyan/20 file:text-accent-cyan hover:file:bg-accent-cyan/30">
+                    </div>
+                    
+                    <!-- Stored Resume Tab -->
+                    <div id="jd-use-stored-content" class="hidden">
+                        <select id="jd-stored-resume-select" 
+                                class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white">
+                            <option value="">Loading resumes...</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div>
@@ -256,6 +368,7 @@ class JDMatcher {
         `;
         
         this.currentMatch = null;
+        this.loadStoredResumes();
     }
 
     downloadReport() {

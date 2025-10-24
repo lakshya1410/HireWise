@@ -16,7 +16,13 @@ ENV/
 *.db
 *.sqlite3
 
-# Uploads
+# Temporary scripts (cleanup/testing)
+check_users.py
+explore_db.py
+view_database.py
+view_db.bat
+
+# Uploads and Reports
 uploads/*
 !uploads/.gitkeep
 reports/*

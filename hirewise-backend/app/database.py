@@ -1,20 +1,28 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from motor.motor_asyncio import AsyncIOMotorClient
 from app.config import settings
 
-engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False}  # Needed for SQLite
-)
+# MongoDB client - initialized once
+mongodb_client = AsyncIOMotorClient(settings.mongodb_url)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Get MongoDB database
+def get_database():
+    return mongodb_client[settings.mongodb_db_name]
 
-Base = declarative_base()
-
-def get_db():
-    db = SessionLocal()
+# Startup event - connect to MongoDB
+async def connect_to_mongo():
+    # Test connection
     try:
-        yield db
-    finally:
-        db.close()
+        await mongodb_client.admin.command('ping')
+        print(f"✅ Connected to MongoDB at {settings.mongodb_url}")
+    except Exception as e:
+        print(f"❌ Failed to connect to MongoDB: {e}")
+        raise
+    
+# Shutdown event - close MongoDB connection
+async def close_mongo_connection():
+    mongodb_client.close()
+    print("Closed MongoDB connection")
+
+# Helper to get database (for dependency injection)
+async def get_db():
+    return get_database()
