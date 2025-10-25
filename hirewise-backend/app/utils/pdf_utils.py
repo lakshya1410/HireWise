@@ -31,7 +31,7 @@ def extract_text_from_pdf(file_path: str) -> str:
     
     return text.strip()
 
-def extract_sections(text: str) -> Dict[str, str]:
+def extract_sections(text: str) -> Dict[str, bool]:
     """Extract common resume sections"""
     text_lower = text.lower()
     sections = {}
@@ -49,7 +49,7 @@ def extract_sections(text: str) -> Dict[str, str]:
     
     for section_name, pattern in section_patterns.items():
         if re.search(pattern, text_lower):
-            sections[section_name] = True
+            sections[section_name] = section_name
     
     return sections
 

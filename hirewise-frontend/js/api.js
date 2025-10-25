@@ -168,14 +168,37 @@ const API = {
 
     async getResumeFile(resumeId) {
         try {
+            console.log('Fetching resume file for ID:', resumeId);
+            console.log('URL:', `${this.baseURL}/ats/resumes/file/${resumeId}`);
+            
             const response = await fetch(`${this.baseURL}/ats/resumes/file/${resumeId}`);
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            console.log('Response headers:', response.headers);
+            
             if (!response.ok) {
-                throw new Error('Failed to fetch resume file');
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                throw new Error(`Failed to fetch resume file: ${response.status} ${response.statusText}`);
             }
-            return await response.blob();
+            
+            const blob = await response.blob();
+            console.log('Blob received:', blob.type, blob.size);
+            return blob;
         } catch (error) {
             console.error('Error fetching resume file:', error);
-            return null;
+            throw error; // Re-throw so calling function can handle it
+        }
+    },
+
+    async deleteResume(resumeId) {
+        try {
+            const response = await fetch(`${this.baseURL}/ats/resumes/${resumeId}`, {
+                method: 'DELETE'
+            });
+            return await this.handleResponse(response);
+        } catch (error) {
+            return this.handleError(error);
         }
     },
 
@@ -428,6 +451,129 @@ const API = {
             success: true,
             data: questions.slice(0, count)
         };
+    },
+
+    // Calendar Activities API
+    async getCalendarActivities(startDate = null, endDate = null) {
+        try {
+            const user = Storage.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            let url = `${this.baseURL}/calendar/activities`;
+            const params = new URLSearchParams();
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            if (params.toString()) url += `?${params.toString()}`;
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.email}`
+                }
+            });
+
+            return await this.handleResponse(response);
+        } catch (error) {
+            return this.handleError(error);
+        }
+    },
+
+    async getActivitiesByDate(date) {
+        try {
+            const user = Storage.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const response = await fetch(`${this.baseURL}/calendar/activities/${date}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.email}`
+                }
+            });
+
+            return await this.handleResponse(response);
+        } catch (error) {
+            return this.handleError(error);
+        }
+    },
+
+    async createCalendarActivity(activityData) {
+        try {
+            const user = Storage.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const response = await fetch(`${this.baseURL}/calendar/activities`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.email}`
+                },
+                body: JSON.stringify(activityData)
+            });
+
+            return await this.handleResponse(response);
+        } catch (error) {
+            return this.handleError(error);
+        }
+    },
+
+    async updateCalendarActivity(activityId, activityData) {
+        try {
+            const user = Storage.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const response = await fetch(`${this.baseURL}/calendar/activities/${activityId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.email}`
+                },
+                body: JSON.stringify(activityData)
+            });
+
+            return await this.handleResponse(response);
+        } catch (error) {
+            return this.handleError(error);
+        }
+    },
+
+    async deleteCalendarActivity(activityId) {
+        try {
+            const user = Storage.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const response = await fetch(`${this.baseURL}/calendar/activities/${activityId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.email}`
+                }
+            });
+
+            return await this.handleResponse(response);
+        } catch (error) {
+            return this.handleError(error);
+        }
+    },
+
+    async getCalendarStats() {
+        try {
+            const user = Storage.getUser();
+            if (!user) throw new Error('User not authenticated');
+
+            const response = await fetch(`${this.baseURL}/calendar/stats`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user.email}`
+                }
+            });
+
+            return await this.handleResponse(response);
+        } catch (error) {
+            return this.handleError(error);
+        }
     }
 };
 

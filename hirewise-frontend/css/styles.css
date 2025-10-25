@@ -99,11 +99,31 @@ section {
 @keyframes slide-up {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes slide-down {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
     }
 }
 
@@ -221,7 +241,7 @@ input, textarea, select {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(4px);
-    z-index: 1000;
+    z-index: 100000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -236,6 +256,7 @@ input, textarea, select {
     max-height: 90vh;
     overflow-y: auto;
     animation: slide-up 0.3s ease;
+    position: relative;
 }
 
 /* Notification */

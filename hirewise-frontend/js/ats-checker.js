@@ -5,15 +5,35 @@ class ATSChecker {
     }
 
     openModal() {
+        console.log('=== OPEN MODAL CALLED ===');
+        
+        // Remove any existing modal first
+        const existingModal = document.getElementById('ats-checker-modal');
+        if (existingModal) {
+            console.log('Removing existing modal');
+            existingModal.remove();
+        }
+        
+        console.log('Creating new modal...');
+        
         const modal = document.createElement('div');
         modal.id = 'ats-checker-modal';
         modal.className = 'modal-backdrop';
+        modal.style.display = 'flex'; // Force display
+        modal.style.zIndex = '99999'; // Higher than notifications (9999)
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        
+        console.log('Modal element created');
         
         modal.innerHTML = `
-            <div class="modal max-w-4xl p-0">
+            <div class="modal max-w-4xl p-0" style="max-height: 90vh; overflow-y: auto;">
                 <div class="modal-header">
                     <h2 class="text-2xl font-bold">ATS Compatibility Checker</h2>
-                    <button class="close-modal" onclick="this.closest('.modal-backdrop').remove()">×</button>
+                    <button class="close-modal" onclick="event.stopPropagation(); document.getElementById('ats-checker-modal').remove();">×</button>
                 </div>
                 <div class="modal-body">
                     <div id="ats-input-section">
@@ -26,10 +46,10 @@ class ATSChecker {
                         <div class="space-y-6">
                             <!-- Resume Selection Tabs -->
                             <div class="flex gap-4 border-b border-accent-cyan/20">
-                                <button id="upload-new-tab" class="px-4 py-2 border-b-2 border-accent-cyan text-accent-cyan font-semibold" onclick="ATSChecker.instance.switchTab('upload')">
+                                <button id="upload-new-tab" class="px-4 py-2 border-b-2 border-accent-cyan text-accent-cyan font-semibold" onclick="event.preventDefault(); ATSChecker.instance.switchTab('upload')">
                                     Upload New
                                 </button>
-                                <button id="use-stored-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-accent-cyan" onclick="ATSChecker.instance.switchTab('stored')">
+                                <button id="use-stored-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-accent-cyan" onclick="event.preventDefault(); ATSChecker.instance.switchTab('stored')">
                                     Use Stored Resume
                                 </button>
                             </div>
@@ -64,7 +84,7 @@ class ATSChecker {
                             </div>
                             
                             <div class="flex gap-4">
-                                <button onclick="ATSChecker.instance.checkATS()" 
+                                <button type="button" onclick="event.preventDefault(); event.stopPropagation(); ATSChecker.instance.checkATS(event); return false;" 
                                         class="flex-1 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
                                     Check ATS Score
                                 </button>
@@ -81,8 +101,29 @@ class ATSChecker {
         
         document.body.appendChild(modal);
         
+        console.log('Modal appended to body');
+        
+        // Prevent modal from closing when clicking inside it
+        const modalContent = modal.querySelector('.modal');
+        if (modalContent) {
+            modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+        
+        // Close modal when clicking on backdrop (outside modal content)
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                console.log('Backdrop clicked - closing modal');
+                modal.remove();
+            }
+        });
+        
         // Load stored resumes
         this.loadStoredResumes();
+        
+        console.log('=== MODAL OPENED SUCCESSFULLY ===');
+        console.log('Modal added to body:', !!document.getElementById('ats-checker-modal'));
     }
 
     switchTab(tab) {
@@ -124,7 +165,16 @@ class ATSChecker {
         }
     }
 
-    async checkATS() {
+    async checkATS(event) {
+        // Prevent any default behavior or propagation
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+        }
+        
+        console.log('=== CHECK ATS CALLED ===');
+        
         const uploadContent = document.getElementById('upload-new-content');
         const storedContent = document.getElementById('use-stored-content');
         
@@ -137,20 +187,34 @@ class ATSChecker {
             const file = fileInput?.files[0];
             
             if (!file) {
-                showNotification('Please upload a resume file', 'warning');
-                return;
+                this.showInlineNotification('Please upload a resume file', 'warning');
+                return false;
+            }
+            
+            // Validate file type
+            if (!file.name.toLowerCase().endsWith('.pdf')) {
+                this.showInlineNotification('Please upload a PDF file only', 'warning');
+                return false;
+            }
+            
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                this.showInlineNotification('File size must be less than 5MB', 'warning');
+                return false;
             }
             
             // Show loading
             const inputSection = document.getElementById('ats-input-section');
-            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing resume...</p></div>';
+            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing resume... This may take 10-20 seconds.</p></div>';
             
             try {
+                console.log('Checking ATS for file:', file.name);
                 response = await API.checkATS(file);
+                console.log('ATS Response:', response);
             } catch (error) {
                 console.error('Error checking ATS:', error);
-                this.showError('Failed to analyze resume. Please check your internet connection and backend server.');
-                return;
+                this.showError('Failed to analyze resume. Please check your backend server is running on port 8001.');
+                return false;
             }
         } else {
             // Use stored resume
@@ -158,37 +222,52 @@ class ATSChecker {
             const resumeId = select?.value;
             
             if (!resumeId) {
-                showNotification('Please select a resume', 'warning');
-                return;
+                this.showInlineNotification('Please select a resume', 'warning');
+                return false;
             }
             
             // Show loading
             const inputSection = document.getElementById('ats-input-section');
-            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing stored resume...</p></div>';
+            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing stored resume... This may take 10-20 seconds.</p></div>';
             
             try {
+                console.log('Checking ATS for stored resume:', resumeId);
                 response = await API.checkATSStored(resumeId);
+                console.log('ATS Response:', response);
             } catch (error) {
                 console.error('Error checking ATS:', error);
                 this.showError('Failed to analyze resume. Please try again.');
-                return;
+                return false;
             }
         }
         
         // Handle response
-        if (response.success) {
+        if (response && response.success) {
             this.currentResult = response.data;
             this.showResults();
         } else {
-            this.showError(response.message || 'Failed to analyze resume');
+            this.showError(response?.message || 'Failed to analyze resume. Please check backend logs for details.');
         }
+        
+        return false; // Prevent any further event propagation
     }
 
     showError(message) {
         const inputSection = document.getElementById('ats-input-section');
         inputSection.innerHTML = `
             <div class="text-center py-12">
-                <p class="text-red-500 mb-4">❌ ${message}</p>
+                <div class="text-6xl mb-4">❌</div>
+                <h3 class="text-xl font-bold text-red-500 mb-4">Analysis Failed</h3>
+                <p class="text-gray-300 mb-6 max-w-md mx-auto">${message}</p>
+                <div class="space-y-3 text-left max-w-md mx-auto bg-primary-dark p-4 rounded-lg mb-6">
+                    <p class="text-sm text-gray-400 font-semibold">Common Issues:</p>
+                    <ul class="text-sm text-gray-300 space-y-2">
+                        <li>• Backend server not running (run start_server.bat)</li>
+                        <li>• PDF file is corrupted or password-protected</li>
+                        <li>• MongoDB not running on localhost:27017</li>
+                        <li>• Gemini API key not configured in .env file</li>
+                    </ul>
+                </div>
                 <button onclick="ATSChecker.instance.reset()" 
                         class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
                     Try Again
@@ -197,27 +276,61 @@ class ATSChecker {
         `;
     }
 
-    async useStoredResume() {
-        showNotification('Please upload a resume file directly', 'info');
+    showInlineNotification(message, type = 'info') {
+        // Create inline notification within modal
+        const modal = document.getElementById('ats-checker-modal');
+        if (!modal) return;
+        
+        const notification = document.createElement('div');
+        notification.className = `inline-notification ${type}`;
+        notification.style.cssText = `
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 1.5rem;
+            background-color: ${type === 'error' ? '#dc2626' : type === 'warning' ? '#f59e0b' : '#10b981'};
+            color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            z-index: 100000;
+            animation: slide-down 0.3s ease;
+            max-width: 500px;
+        `;
+        notification.textContent = message;
+        
+        modal.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'fade-out 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 
     showResults() {
+        console.log('=== ATS SHOW RESULTS ===');
+        console.log('Current result:', this.currentResult);
+        
         const inputSection = document.getElementById('ats-input-section');
         const resultsSection = document.getElementById('ats-results-section');
         const resultsContent = document.getElementById('ats-results-content');
         
-        inputSection.classList.add('hidden');
-        resultsSection.classList.remove('hidden');
+        if (!inputSection || !resultsSection || !resultsContent) {
+            console.error('Required elements not found!');
+            return;
+        }
         
         const result = this.currentResult;
         const scoreColor = result.overallScore >= 80 ? 'text-green-500' : 
                           result.overallScore >= 60 ? 'text-yellow-500' : 'text-red-500';
         
+        console.log('Rendering results with atsId:', result.atsId);
+        
         resultsContent.innerHTML = `
             <!-- Overall Score -->
             <div class="text-center mb-8">
-                <div class="score-circle mx-auto border-8" style="border-color: ${scoreColor.replace('text-', '')}">
-                    <span class="${scoreColor}">${result.overallScore}%</span>
+                <div class="score-circle mx-auto border-8" style="border-color: ${scoreColor.replace('text-', '')}; width: 150px; height: 150px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <span class="${scoreColor}" style="font-size: 2.5rem; font-weight: bold;">${result.overallScore}%</span>
                 </div>
                 <h3 class="text-2xl font-bold mt-4">ATS Compatibility Score</h3>
                 <p class="text-gray-400">
@@ -237,8 +350,8 @@ class ATSChecker {
                             <span class="font-semibold">Formatting</span>
                             <span class="text-accent-cyan font-bold">${result.metrics.formatting}%</span>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${result.metrics.formatting}%"></div>
+                        <div class="progress-bar" style="width: 100%; height: 8px; background-color: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-fill" style="width: ${result.metrics.formatting}%; height: 100%; background: linear-gradient(90deg, #00acc1, #00d4ff); transition: width 0.5s ease;"></div>
                         </div>
                     </div>
                 </div>
@@ -249,8 +362,8 @@ class ATSChecker {
                             <span class="font-semibold">Keywords</span>
                             <span class="text-accent-cyan font-bold">${result.metrics.keywords}%</span>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${result.metrics.keywords}%"></div>
+                        <div class="progress-bar" style="width: 100%; height: 8px; background-color: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-fill" style="width: ${result.metrics.keywords}%; height: 100%; background: linear-gradient(90deg, #00acc1, #00d4ff); transition: width 0.5s ease;"></div>
                         </div>
                     </div>
                 </div>
@@ -261,8 +374,8 @@ class ATSChecker {
                             <span class="font-semibold">Readability</span>
                             <span class="text-accent-cyan font-bold">${result.metrics.readability}%</span>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${result.metrics.readability}%"></div>
+                        <div class="progress-bar" style="width: 100%; height: 8px; background-color: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-fill" style="width: ${result.metrics.readability}%; height: 100%; background: linear-gradient(90deg, #00acc1, #00d4ff); transition: width 0.5s ease;"></div>
                         </div>
                     </div>
                 </div>
@@ -273,8 +386,8 @@ class ATSChecker {
                             <span class="font-semibold">Structure</span>
                             <span class="text-accent-cyan font-bold">${result.metrics.structure}%</span>
                         </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${result.metrics.structure}%"></div>
+                        <div class="progress-bar" style="width: 100%; height: 8px; background-color: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-fill" style="width: ${result.metrics.structure}%; height: 100%; background: linear-gradient(90deg, #00acc1, #00d4ff); transition: width 0.5s ease;"></div>
                         </div>
                     </div>
                 </div>
@@ -297,22 +410,50 @@ class ATSChecker {
             
             <!-- Actions -->
             <div class="flex gap-4 mt-8">
-                <button onclick="ATSChecker.instance.downloadReport()" 
-                        class="flex-1 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
-                    Download Report
-                </button>
-                <button onclick="ATSChecker.instance.reset()" 
+                ${result.atsId ? `
+                    <button onclick="event.preventDefault(); ATSChecker.instance.downloadReport()" 
+                            class="flex-1 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Download DOCX Report
+                    </button>
+                ` : `
+                    <button disabled
+                            class="flex-1 px-6 py-3 bg-gray-700 text-gray-400 rounded-lg cursor-not-allowed">
+                        Report Not Available
+                    </button>
+                `}
+                <button onclick="event.preventDefault(); ATSChecker.instance.reset()" 
                         class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
                     Check Another Resume
                 </button>
-                <button onclick="this.closest('.modal-backdrop').remove()" 
-                        class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                <button onclick="event.preventDefault(); document.getElementById('ats-checker-modal').remove()" 
+                        class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                     Close
                 </button>
             </div>
         `;
         
-        showNotification('ATS analysis complete!', 'success');
+        // Hide input section and show results
+        inputSection.classList.add('hidden');
+        resultsSection.classList.remove('hidden');
+        
+        console.log('Results displayed successfully');
+        
+        // Log activity to calendar
+        if (typeof window.logCalendarActivity === 'function') {
+            try {
+                window.logCalendarActivity('ats_check', 'ATS Resume Check', {
+                    description: `ATS compatibility check completed with score: ${result.overallScore}%`,
+                    score: result.overallScore,
+                    reference_id: result.atsId,
+                    status: 'completed'
+                });
+            } catch (error) {
+                console.error('Error logging to calendar:', error);
+            }
+        }
     }
 
     reset() {
@@ -333,10 +474,10 @@ class ATSChecker {
             <div class="space-y-6">
                 <!-- Resume Selection Tabs -->
                 <div class="flex gap-4 border-b border-accent-cyan/20">
-                    <button id="upload-new-tab" class="px-4 py-2 border-b-2 border-accent-cyan text-accent-cyan font-semibold" onclick="ATSChecker.instance.switchTab('upload')">
+                    <button id="upload-new-tab" class="px-4 py-2 border-b-2 border-accent-cyan text-accent-cyan font-semibold" onclick="event.preventDefault(); ATSChecker.instance.switchTab('upload')">
                         Upload New
                     </button>
-                    <button id="use-stored-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-accent-cyan" onclick="ATSChecker.instance.switchTab('stored')">
+                    <button id="use-stored-tab" class="px-4 py-2 border-b-2 border-transparent text-gray-400 hover:text-accent-cyan" onclick="event.preventDefault(); ATSChecker.instance.switchTab('stored')">
                         Use Stored Resume
                     </button>
                 </div>
@@ -371,7 +512,7 @@ class ATSChecker {
                 </div>
                 
                 <div class="flex gap-4">
-                    <button onclick="ATSChecker.instance.checkATS()" 
+                    <button type="button" onclick="event.preventDefault(); event.stopPropagation(); ATSChecker.instance.checkATS(event); return false;" 
                             class="flex-1 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
                         Check ATS Score
                     </button>
@@ -384,38 +525,41 @@ class ATSChecker {
     }
 
     downloadReport() {
-        if (!this.currentResult) return;
+        if (!this.currentResult) {
+            this.showInlineNotification('No report available', 'error');
+            return;
+        }
         
-        const result = this.currentResult;
-        const report = `
-ATS COMPATIBILITY REPORT
-Generated: ${new Date().toLocaleString()}
-=====================================
-
-OVERALL SCORE: ${result.overallScore}%
-
-DETAILED METRICS:
-- Formatting: ${result.metrics.formatting}%
-- Keywords: ${result.metrics.keywords}%
-- Readability: ${result.metrics.readability}%
-- Structure: ${result.metrics.structure}%
-
-IMPROVEMENT SUGGESTIONS:
-${result.suggestions.map((suggestion, i) => `${i + 1}. ${suggestion}`).join('\n')}
-
-=====================================
-Generated by HireWise - AI-Powered Interview Platform
-        `;
-        
-        const blob = new Blob([report], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `ats-report-${Date.now()}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        showNotification('Report downloaded!', 'success');
+        // Check if we have atsId from backend
+        if (this.currentResult.atsId) {
+            // Download DOCX report from backend
+            const downloadUrl = `http://localhost:8001/api/ats/download/${this.currentResult.atsId}`;
+            
+            fetch(downloadUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to download report');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ats_report_${Date.now()}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    this.showInlineNotification('Report downloaded successfully!', 'success');
+                })
+                .catch(error => {
+                    console.error('Error downloading report:', error);
+                    this.showInlineNotification('Failed to download report', 'error');
+                });
+        } else {
+            this.showInlineNotification('Report not available. Please try checking ATS again.', 'error');
+        }
     }
 }
 

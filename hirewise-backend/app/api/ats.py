@@ -27,6 +27,11 @@ async def analyze_ats(
 ):
     """Analyze resume for ATS compatibility"""
     
+    print(f"=== ATS Analysis Started ===")
+    print(f"File: {file.filename}")
+    print(f"Content Type: {file.content_type}")
+    print(f"User ID: {user_id}")
+    
     # Validate file type
     if not file.filename.endswith(('.pdf', '.PDF')):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
@@ -36,22 +41,34 @@ async def analyze_ats(
     filename = f"resume_{timestamp}_{file.filename}"
     filepath = os.path.join(settings.upload_dir, filename)
     
-    with open(filepath, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    print(f"Saving file to: {filepath}")
+    
+    try:
+        with open(filepath, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        print(f"File saved successfully")
+    except Exception as e:
+        print(f"Error saving file: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
     
     try:
         # Extract text from PDF
+        print("Extracting text from PDF...")
         resume_text = extract_text_from_pdf(filepath)
+        print(f"Extracted {len(resume_text)} characters")
         
         if not resume_text or len(resume_text) < 50:
-            raise HTTPException(status_code=400, detail="Could not extract text from PDF")
+            raise HTTPException(status_code=400, detail="Could not extract text from PDF. The file may be corrupted or scanned image.")
         
         # Calculate ATS score
+        print("Calculating ATS score...")
         ats_scorer = ATSScorer()
         result = ats_scorer.calculate_ats_score(resume_text)
+        print(f"ATS Score calculated: {result['overall_score']}")
         
         # Save to database if user_id provided
         if user_id:
+            print(f"Saving to database for user: {user_id}")
             # Save resume record
             resume_doc = {
                 "user_id": user_id,
@@ -64,6 +81,7 @@ async def analyze_ats(
             }
             resume_result = await db.resumes.insert_one(resume_doc)
             resume_id = str(resume_result.inserted_id)
+            print(f"Resume saved with ID: {resume_id}")
             
             # Save ATS result
             ats_doc = {
@@ -80,12 +98,15 @@ async def analyze_ats(
             }
             ats_insert = await db.ats_results.insert_one(ats_doc)
             ats_id = str(ats_insert.inserted_id)
+            print(f"ATS result saved with ID: {ats_id}")
             
             # Generate report
+            print("Generating report...")
             report_gen = ReportGenerator()
             user = await db.users.find_one({"_id": ObjectId(user_id)})
             user_name = user['full_name'] if user else "User"
             report_path = report_gen.generate_ats_report(result, user_name)
+            print(f"Report generated: {report_path}")
             
             # Update with report path
             await db.ats_results.update_one(
@@ -114,14 +135,22 @@ async def analyze_ats(
             response_data['atsId'] = result.get('atsId')
             response_data['reportPath'] = result.get('reportPath')
         
+        print("=== ATS Analysis Completed Successfully ===")
+        
         return {
             "success": True,
             "data": response_data,
             "message": "ATS analysis complete"
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error analyzing ATS: {e}")
+        print(f"=== ERROR in ATS Analysis ===")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Error message: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/download/{ats_id}")
@@ -184,6 +213,38 @@ async def get_resume_file(resume_id: str, db = Depends(get_db)):
         media_type='application/pdf',
         filename=resume['file_name']
     )
+
+@router.delete("/resumes/{resume_id}")
+async def delete_resume(resume_id: str, db = Depends(get_db)):
+    """Delete a resume and its associated file"""
+    try:
+        resume = await db.resumes.find_one({"_id": ObjectId(resume_id)})
+    except:
+        raise HTTPException(status_code=400, detail="Invalid resume ID")
+    
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    
+    # Delete physical file if exists
+    if resume.get('file_path') and os.path.exists(resume['file_path']):
+        try:
+            os.remove(resume['file_path'])
+        except Exception as e:
+            print(f"Error deleting file: {e}")
+    
+    # Delete from database
+    await db.resumes.delete_one({"_id": ObjectId(resume_id)})
+    
+    # Also delete associated ATS results
+    await db.ats_results.delete_many({"resume_id": resume_id})
+    
+    # Delete associated JD matches
+    await db.jd_matches.delete_many({"resume_id": resume_id})
+    
+    return {
+        "success": True,
+        "message": "Resume deleted successfully"
+    }
 
 @router.post("/analyze-stored", response_model=ATSResponse)
 async def analyze_stored_resume(

@@ -20,19 +20,27 @@ class ATSScorer:
         Formula: Overall Score = (Formatting * 0.25) + (Keywords * 0.30) + 
                                  (Structure * 0.25) + (Readability * 0.20)
         """
+        print("=== Starting ATS Score Calculation ===")
+        
         # 1. Check formatting (25% weight)
+        print("Checking formatting...")
         formatting_result = check_formatting(resume_text)
         formatting_score = formatting_result['score']
+        print(f"Formatting score: {formatting_score}")
         
         # 2. Check keywords (30% weight)
+        print("Extracting keywords...")
         keywords = extract_keywords(resume_text)
         keywords_score = min((len(keywords) / 15) * 100, 100)  # Target: 15+ keywords
+        print(f"Keywords found: {len(keywords)}, Score: {keywords_score}")
         
         # 3. Check structure (25% weight)
+        print("Checking structure...")
         sections = extract_sections(resume_text)
         required_sections = ['experience', 'education', 'skills']
-        found_sections = sum(1 for sec in required_sections if sec in sections)
-        structure_score = (found_sections / len(required_sections)) * 100
+        found_sections = [sec for sec in required_sections if sec in sections]
+        structure_score = (len(found_sections) / len(required_sections)) * 100
+        print(f"Sections found: {list(sections.keys())}, Score: {structure_score}")
         
         # Check contact info
         contact_info = extract_contact_info(resume_text)
@@ -40,8 +48,10 @@ class ATSScorer:
             structure_score = min(structure_score + 10, 100)
         if contact_info['has_phone']:
             structure_score = min(structure_score + 10, 100)
+        print(f"Final structure score: {structure_score}")
         
         # 4. Readability (20% weight)
+        print("Checking readability...")
         word_count = len(resume_text.split())
         if 300 <= word_count <= 800:
             readability_score = 100
@@ -49,6 +59,7 @@ class ATSScorer:
             readability_score = (word_count / 300) * 100
         else:
             readability_score = max(100 - ((word_count - 800) / 20), 60)
+        print(f"Word count: {word_count}, Readability score: {readability_score}")
         
         # Calculate weighted average
         overall_score = (
@@ -57,13 +68,17 @@ class ATSScorer:
             (structure_score * 0.25) +
             (readability_score * 0.20)
         )
+        print(f"Initial overall score: {overall_score}")
         
         # Get AI analysis
+        print("Getting AI analysis...")
         ai_analysis = self.get_ai_analysis(resume_text)
+        print(f"AI analysis score: {ai_analysis.get('score', 'N/A')}")
         
         # Combine AI score with formula (weighted: 60% formula, 40% AI)
         if ai_analysis and 'score' in ai_analysis:
             overall_score = (overall_score * 0.6) + (ai_analysis['score'] * 0.4)
+            print(f"Combined score with AI: {overall_score}")
         
         # Generate suggestions
         suggestions = self.generate_suggestions(
@@ -71,7 +86,7 @@ class ATSScorer:
             contact_info, word_count, ai_analysis
         )
         
-        return {
+        result = {
             'overall_score': round(overall_score, 1),
             'formatting_score': round(formatting_score, 1),
             'keywords_score': round(keywords_score, 1),
@@ -82,10 +97,26 @@ class ATSScorer:
             'found_keywords': keywords,
             'sections_found': list(sections.keys())
         }
+        
+        print("=== ATS Score Calculation Complete ===")
+        print(f"Final result: {result}")
+        
+        return result
     
     def get_ai_analysis(self, resume_text: str) -> Dict:
         """Get AI-powered ATS analysis using Gemini"""
         try:
+            # Check if API key is configured
+            if not settings.gemini_api_key or settings.gemini_api_key == "your_gemini_api_key_here":
+                print("Gemini API key not configured, skipping AI analysis")
+                return {
+                    'score': 75,
+                    'formatting_issues': ["Configure Gemini API key for AI-powered analysis"],
+                    'missing_sections': [],
+                    'keyword_suggestions': [],
+                    'improvements': ["Get detailed AI analysis by adding your Gemini API key in .env file"]
+                }
+            
             prompt = f"""
 Analyze this resume for ATS (Applicant Tracking System) compatibility.
 Provide a detailed analysis in JSON format with:
@@ -96,7 +127,7 @@ Provide a detailed analysis in JSON format with:
 5. Specific improvements needed
 
 Resume:
-{resume_text[:3000]}  # Limit to avoid token limits
+{resume_text[:3000]}
 
 Return ONLY valid JSON in this exact format:
 {{

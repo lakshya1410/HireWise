@@ -5,9 +5,18 @@ class JDMatcher {
     }
 
     openModal() {
+        // Remove any existing modal first
+        const existingModal = document.getElementById('jd-matcher-modal');
+        if (existingModal) {
+            console.log('Removing existing JD matcher modal');
+            existingModal.remove();
+        }
+        
         const modal = document.createElement('div');
         modal.id = 'jd-matcher-modal';
         modal.className = 'modal-backdrop';
+        modal.style.display = 'flex'; // Force display
+        modal.style.zIndex = '10000'; // Ensure it's on top
         
         modal.innerHTML = `
             <div class="modal max-w-6xl p-0">
@@ -77,6 +86,27 @@ class JDMatcher {
         
         document.body.appendChild(modal);
         
+        // Add MutationObserver to detect if modal gets removed
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.removedNodes.forEach((node) => {
+                    if (node.id === 'jd-matcher-modal') {
+                        console.error('=== JD MATCHER MODAL REMOVED ===');
+                        console.trace('Modal removal stack trace:');
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true });
+        
+        // Prevent modal from closing when clicking inside it
+        const modalContent = modal.querySelector('.modal');
+        if (modalContent) {
+            modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+        
         // Load stored resumes
         this.loadStoredResumes();
     }
@@ -121,10 +151,10 @@ class JDMatcher {
     }
 
     async analyzeMatch() {
-        const jdText = document.getElementById('jd-text').value;
+        const jdText = document.getElementById('jd-text')?.value;
         
-        if (!jdText) {
-            showNotification('Please provide a job description', 'warning');
+        if (!jdText || jdText.trim().length < 50) {
+            showNotification('Please provide a job description (minimum 50 characters)', 'warning');
             return;
         }
         
@@ -143,15 +173,29 @@ class JDMatcher {
                 return;
             }
             
+            // Validate file type
+            if (!resumeFile.name.toLowerCase().endsWith('.pdf')) {
+                showNotification('Please upload a PDF file only', 'warning');
+                return;
+            }
+            
+            // Validate file size (5MB max)
+            if (resumeFile.size > 5 * 1024 * 1024) {
+                showNotification('File size must be less than 5MB', 'warning');
+                return;
+            }
+            
             // Show loading
             const inputSection = document.getElementById('jd-input-section');
-            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing match...</p></div>';
+            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing match... This may take 10-20 seconds.</p></div>';
             
             try {
+                console.log('Analyzing JD match with file:', resumeFile.name);
                 response = await API.analyzeJDMatch(resumeFile, jdText);
+                console.log('JD Match Response:', response);
             } catch (error) {
                 console.error('Error analyzing match:', error);
-                this.showError('Failed to analyze match. Please check your connection.');
+                this.showError('Failed to analyze match. Please check your backend server is running on port 8001.');
                 return;
             }
         } else {
@@ -166,10 +210,12 @@ class JDMatcher {
             
             // Show loading
             const inputSection = document.getElementById('jd-input-section');
-            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing stored resume...</p></div>';
+            inputSection.innerHTML = '<div class="text-center py-12"><div class="spinner mx-auto"></div><p class="mt-4 text-gray-400">Analyzing stored resume... This may take 10-20 seconds.</p></div>';
             
             try {
+                console.log('Analyzing JD match for stored resume:', resumeId);
                 response = await API.analyzeJDMatchStored(resumeId, jdText);
+                console.log('JD Match Response:', response);
             } catch (error) {
                 console.error('Error analyzing match:', error);
                 this.showError('Failed to analyze match. Please try again.');
@@ -178,11 +224,11 @@ class JDMatcher {
         }
         
         // Handle response
-        if (response.success) {
+        if (response && response.success && response.data) {
             this.currentMatch = response.data;
             this.showResults();
         } else {
-            this.showError(response.message || 'Failed to analyze match');
+            this.showError(response?.message || 'Failed to analyze match. Please check backend logs for details.');
         }
     }
 
@@ -190,13 +236,25 @@ class JDMatcher {
         const inputSection = document.getElementById('jd-input-section');
         inputSection.innerHTML = `
             <div class="text-center py-12">
-                <p class="text-red-500 mb-4">❌ ${message}</p>
+                <div class="text-6xl mb-4">❌</div>
+                <h3 class="text-xl font-bold text-red-500 mb-4">Analysis Failed</h3>
+                <p class="text-gray-300 mb-6 max-w-md mx-auto">${message}</p>
+                <div class="space-y-3 text-left max-w-md mx-auto bg-primary-dark p-4 rounded-lg mb-6">
+                    <p class="text-sm text-gray-400 font-semibold">Common Issues:</p>
+                    <ul class="text-sm text-gray-300 space-y-2">
+                        <li>• Backend server not running (run start_server.bat)</li>
+                        <li>• PDF file is corrupted or password-protected</li>
+                        <li>• Job description is too short (minimum 50 characters)</li>
+                        <li>• MongoDB not running on localhost:27017</li>
+                    </ul>
+                </div>
                 <button onclick="JDMatcher.instance.reset()" 
                         class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
                     Try Again
                 </button>
             </div>
         `;
+        showNotification(message, 'error');
     }
 
     showResults() {
@@ -204,10 +262,24 @@ class JDMatcher {
         const resultsSection = document.getElementById('jd-results-section');
         const resultsContent = document.getElementById('jd-results-content');
         
+        if (!inputSection || !resultsSection || !resultsContent) {
+            console.error('Required elements not found!');
+            return;
+        }
+        
         inputSection.classList.add('hidden');
         resultsSection.classList.remove('hidden');
         
         const match = this.currentMatch;
+        
+        console.log('JD Match result:', match);
+        
+        // Ensure data structure is correct
+        if (!match || !match.matchScore || !match.analysis) {
+            console.error('Invalid match data:', match);
+            this.showError('Invalid response data received');
+            return;
+        }
         
         resultsContent.innerHTML = `
             <!-- Overall Match Score -->
@@ -278,33 +350,58 @@ class JDMatcher {
             <div class="comparison-section">
                 <h3 class="text-xl font-bold mb-4 text-accent-cyan">Recommendations</h3>
                 <ul class="space-y-3">
-                    ${match.recommendations.map(rec => `
+                    ${(match.recommendations && match.recommendations.length > 0) ? match.recommendations.map(rec => `
                         <li class="flex items-start gap-3 p-3 bg-primary-dark rounded-lg">
                             <span class="text-accent-cyan text-xl">💡</span>
                             <span class="text-gray-300">${rec}</span>
                         </li>
-                    `).join('')}
+                    `).join('') : '<li class="text-gray-400">No recommendations available</li>'}
                 </ul>
             </div>
             
             <!-- Actions -->
             <div class="flex gap-4 mt-6">
-                <button onclick="JDMatcher.instance.downloadReport()" 
-                        class="flex-1 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
-                    Download Report
-                </button>
+                ${match.matchId ? `
+                    <button onclick="JDMatcher.instance.downloadReport()" 
+                            class="flex-1 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Download DOCX Report
+                    </button>
+                ` : `
+                    <button disabled
+                            class="flex-1 px-6 py-3 bg-gray-700 text-gray-400 rounded-lg cursor-not-allowed">
+                        Report Not Available
+                    </button>
+                `}
                 <button onclick="JDMatcher.instance.reset()" 
                         class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
                     New Analysis
                 </button>
-                <button onclick="this.closest('.modal-backdrop').remove()" 
-                        class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                <button onclick="document.getElementById('jd-matcher-modal').remove()" 
+                        class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                     Close
                 </button>
             </div>
         `;
         
+        // Don't close the modal - let user close it manually
         showNotification('Analysis complete!', 'success');
+        
+        // Log activity to calendar
+        if (typeof window.logCalendarActivity === 'function') {
+            try {
+                window.logCalendarActivity('jd_match', 'Job Description Match', {
+                    description: `Job match analysis completed with score: ${match.matchScore}%`,
+                    score: match.matchScore,
+                    reference_id: match.matchId,
+                    status: 'completed'
+                });
+            } catch (error) {
+                console.error('Error logging to calendar:', error);
+            }
+        }
     }
 
     reset() {
@@ -372,37 +469,41 @@ class JDMatcher {
     }
 
     downloadReport() {
-        if (!this.currentMatch) return;
+        if (!this.currentMatch) {
+            showNotification('No report available', 'error');
+            return;
+        }
         
-        const report = `
-JOB DESCRIPTION MATCH REPORT
-Generated: ${new Date().toLocaleString()}
-=====================================
-
-OVERALL MATCH SCORE: ${this.currentMatch.matchScore}%
-
-DETAILED ANALYSIS:
-- Technical Skills: ${this.currentMatch.analysis.technicalSkills}%
-- Experience: ${this.currentMatch.analysis.experience}%
-- Education: ${this.currentMatch.analysis.education}%
-- Keywords: ${this.currentMatch.analysis.keywords}%
-
-RECOMMENDATIONS:
-${this.currentMatch.recommendations.map((rec, i) => `${i + 1}. ${rec}`).join('\n')}
-
-=====================================
-Generated by HireWise - AI-Powered Interview Platform
-        `;
-        
-        const blob = new Blob([report], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `jd-match-report-${Date.now()}.txt`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        showNotification('Report downloaded!', 'success');
+        // Check if we have matchId from backend
+        if (this.currentMatch.matchId) {
+            // Download DOCX report from backend
+            const downloadUrl = `http://localhost:8001/api/jd-matcher/download/${this.currentMatch.matchId}`;
+            
+            fetch(downloadUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to download report');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `jd_match_report_${Date.now()}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showNotification('Report downloaded successfully!', 'success');
+                })
+                .catch(error => {
+                    console.error('Error downloading report:', error);
+                    showNotification('Failed to download report', 'error');
+                });
+        } else {
+            showNotification('Report not available. Please try analyzing again.', 'error');
+        }
     }
 }
 

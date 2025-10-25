@@ -40,8 +40,7 @@
                             </svg>
                         </button>
                         <div id="profile-menu" class="hidden absolute right-0 mt-2 w-48 bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg shadow-lg">
-                            <a href="#" class="block px-4 py-3 hover:bg-accent-cyan/10 transition">Profile</a>
-                            <a href="#" class="block px-4 py-3 hover:bg-accent-cyan/10 transition" onclick="showView('profile')">Profile</a>
+                            <a href="#" class="block px-4 py-3 hover:bg-accent-cyan/10 transition" onclick="showView('profile'); event.preventDefault();">Profile</a>
                             <a href="#" id="logout-btn" class="block px-4 py-3 hover:bg-accent-cyan/10 transition text-red-400">Logout</a>
                         </div>
                     </div>
@@ -89,61 +88,87 @@
         <main class="ml-64 flex-1 p-8">
             <!-- Dashboard View -->
             <div id="dashboard-view" class="view-content">
-                <h1 class="text-3xl font-bold mb-6">Performance Dashboard</h1>
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-3xl font-bold">Performance Dashboard</h1>
+                    <div class="text-sm text-gray-400">
+                        <span id="current-date"></span>
+                    </div>
+                </div>
                 
-                <div class="grid lg:grid-cols-3 gap-6 mb-8">
-                    <!-- Stats Cards -->
-                    <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6 stats-card">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-400 text-sm">Total Interviews</p>
-                                <p class="text-3xl font-bold text-accent-cyan" id="total-interviews">0</p>
+                <!-- Main Layout: Content Left, Calendar Right -->
+                <div class="dashboard-layout">
+                    <!-- Left Content Area -->
+                    <div class="dashboard-main-content">
+                        <!-- Stats Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-5 stats-card">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-xs uppercase tracking-wide mb-1">Total Interviews</p>
+                                        <p class="text-2xl font-bold text-accent-cyan" id="total-interviews">0</p>
+                                    </div>
+                                    <div class="text-3xl opacity-60">🎤</div>
+                                </div>
                             </div>
-                            <div class="text-4xl">🎤</div>
-                        </div>
-                    </div>
-                    <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6 stats-card">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-400 text-sm">Average Score</p>
-                                <p class="text-3xl font-bold text-accent-cyan" id="avg-score">0</p>
+                            <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-5 stats-card">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-xs uppercase tracking-wide mb-1">Average Score</p>
+                                        <p class="text-2xl font-bold text-accent-cyan" id="avg-score">0</p>
+                                    </div>
+                                    <div class="text-3xl opacity-60">⭐</div>
+                                </div>
                             </div>
-                            <div class="text-4xl">⭐</div>
-                        </div>
-                    </div>
-                    <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6 stats-card">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-400 text-sm">Practice Streak</p>
-                                <p class="text-3xl font-bold text-accent-cyan" id="streak-display">0 days</p>
+                            <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-5 stats-card">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-gray-400 text-xs uppercase tracking-wide mb-1">Practice Streak</p>
+                                        <p class="text-2xl font-bold text-accent-cyan" id="streak-display">0 days</p>
+                                    </div>
+                                    <div class="text-3xl opacity-60">🔥</div>
+                                </div>
                             </div>
-                            <div class="text-4xl">🔥</div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="grid lg:grid-cols-3 gap-6">
-                    <!-- Calendar -->
-                    <div class="lg:col-span-2">
+                        <!-- Performance Chart -->
+                        <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold">Performance Trend</h2>
+                                <select id="chart-period" class="bg-primary-dark-secondary border border-accent-cyan/30 rounded px-3 py-1 text-sm text-gray-300 focus:outline-none focus:border-accent-cyan">
+                                    <option value="7">Last 7 days</option>
+                                    <option value="30" selected>Last 30 days</option>
+                                    <option value="90">Last 90 days</option>
+                                </select>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="performance-chart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
                         <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6">
-                            <h2 class="text-xl font-bold mb-4">Interview Calendar</h2>
-                            <div id="calendar"></div>
+                            <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
+                            <div id="recent-activity" class="space-y-3">
+                                <p class="text-gray-400 text-sm">No recent activity</p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Recent Activity -->
-                    <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6">
-                        <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
-                        <div id="recent-activity" class="space-y-4">
-                            <p class="text-gray-400 text-sm">No recent activity</p>
+                    <!-- Right Sidebar: Compact Calendar -->
+                    <div class="dashboard-sidebar">
+                        <div class="bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-4 sticky top-4">
+                            <h2 class="text-lg font-bold mb-3">Interview Calendar</h2>
+                            <div id="calendar" class="compact-calendar"></div>
+                            
+                            <!-- Upcoming Sessions -->
+                            <div class="mt-4 pt-4 border-t border-accent-cyan/20">
+                                <h3 class="text-sm font-semibold text-gray-400 mb-3">Upcoming</h3>
+                                <div id="upcoming-sessions" class="space-y-2">
+                                    <p class="text-xs text-gray-500">No scheduled interviews</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Performance Chart -->
-                <div class="mt-6 bg-primary-dark-secondary/40 backdrop-blur-md border border-accent-cyan/20 rounded-lg p-6">
-                    <h2 class="text-xl font-bold mb-4">Performance Trend</h2>
-                    <canvas id="performance-chart"></canvas>
                 </div>
             </div>
 
@@ -163,7 +188,7 @@
             <div id="ats-view" class="view-content hidden">
                 <h1 class="text-3xl font-bold mb-6">ATS Compatibility Checker</h1>
                 <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
-                    <button id="open-ats-modal" class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                    <button type="button" id="open-ats-modal" class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
                         Check Resume ATS Score
                     </button>
                 </div>

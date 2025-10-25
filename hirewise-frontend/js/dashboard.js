@@ -20,6 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
 function initDashboard() {
     // Set initial view
     showView('dashboard');
+    
+    // Display current date
+    const currentDateEl = document.getElementById('current-date');
+    if (currentDateEl) {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        currentDateEl.textContent = now.toLocaleDateString('en-US', options);
+    }
 }
 
 function initNavigation() {
@@ -68,9 +76,35 @@ function loadViewContent(viewName) {
             break;
         case 'ats':
             // ATS checker modal button
+            console.log('=== ATS View Initialized ===');
             const atsBtn = document.getElementById('open-ats-modal');
+            console.log('ATS Button found:', !!atsBtn);
+            console.log('ATSChecker exists:', typeof ATSChecker !== 'undefined');
+            console.log('ATSChecker.instance exists:', typeof ATSChecker !== 'undefined' && !!ATSChecker.instance);
+            
             if (atsBtn) {
-                atsBtn.onclick = () => ATSChecker.instance.openModal();
+                atsBtn.onclick = (e) => {
+                    console.log('=== ATS BUTTON CLICKED ===');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    try {
+                        if (typeof ATSChecker !== 'undefined' && ATSChecker.instance) {
+                            console.log('Opening ATS modal...');
+                            ATSChecker.instance.openModal();
+                        } else {
+                            console.error('ATSChecker not available!');
+                            alert('ATS Checker is not loaded. Please refresh the page.');
+                        }
+                    } catch (error) {
+                        console.error('Error opening ATS modal:', error);
+                        alert('Error opening ATS Checker: ' + error.message);
+                    }
+                    
+                    return false;
+                };
+            } else {
+                console.error('ATS button not found!');
             }
             break;
         case 'jdmatcher':
@@ -132,8 +166,18 @@ function loadUserData() {
     const streakCount = document.getElementById('streak-count');
     const pointsCount = document.getElementById('points-count');
     
-    if (userName) userName.textContent = user.fullName.split(' ')[0];
-    if (userAvatar) userAvatar.textContent = user.fullName.charAt(0).toUpperCase();
+    if (userName) userName.textContent = user.fullName || user.email;
+    
+    if (userAvatar) {
+        if (user.profilePicture) {
+            // Show profile picture
+            userAvatar.parentElement.innerHTML = `<img src="${user.profilePicture}" class="w-8 h-8 rounded-full object-cover" alt="Profile">`;
+        } else {
+            // Show initial
+            userAvatar.textContent = (user.fullName || user.email).charAt(0).toUpperCase();
+        }
+    }
+    
     if (streakCount) streakCount.textContent = user.streak || 0;
     if (pointsCount) pointsCount.textContent = user.totalPoints || 0;
 }
@@ -184,22 +228,234 @@ function initCalendar() {
     const calendarEl = document.getElementById('calendar');
     if (!calendarEl) return;
     
-    // Initialize FullCalendar
+    // Initialize FullCalendar with compact settings
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         headerToolbar: {
-            left: 'prev,next today',
+            left: 'prev,next',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek'
+            right: ''
         },
-        events: getCalendarEvents(),
+        events: async function(info, successCallback, failureCallback) {
+            try {
+                // Fetch activities from database
+                const result = await API.getCalendarActivities(
+                    info.startStr,
+                    info.endStr
+                );
+                
+                if (result.success && result.data.activities) {
+                    const events = result.data.activities.map(activity => ({
+                        id: activity._id,
+                        title: activity.title,
+                        start: activity.date,
+                        backgroundColor: getActivityColor(activity.activity_type, activity.status),
+                        borderColor: getActivityColor(activity.activity_type, activity.status),
+                        extendedProps: {
+                            activity: activity
+                        }
+                    }));
+                    successCallback(events);
+                } else {
+                    successCallback([]);
+                }
+            } catch (error) {
+                console.error('Error loading calendar activities:', error);
+                failureCallback(error);
+            }
+        },
+        dateClick: function(info) {
+            showDayActivities(info.dateStr);
+        },
         eventClick: function(info) {
-            alert('Interview: ' + info.event.title);
+            showDayActivities(info.event.startStr.split('T')[0]);
         },
-        height: 'auto'
+        height: 'auto',
+        contentHeight: 'auto',
+        aspectRatio: 1.2,
+        fixedWeekCount: false,
+        showNonCurrentDates: false,
+        dayMaxEvents: false,
+        eventDisplay: 'list-item',
+        displayEventTime: false,
+        eventDidMount: function(info) {
+            // Add class to day cell to show it has activities
+            const dayEl = info.el.closest('.fc-daygrid-day');
+            if (dayEl) {
+                dayEl.classList.add('has-activity');
+            }
+        }
     });
     
     calendar.render();
+    
+    // Store calendar instance globally for refresh
+    window.dashboardCalendar = calendar;
+    
+    // Update upcoming sessions
+    updateUpcomingSessions();
+}
+
+function getActivityColor(activityType, status) {
+    if (status === 'completed') {
+        return '#10b981'; // Green
+    } else if (status === 'cancelled') {
+        return '#ef4444'; // Red
+    }
+    
+    // Color by type for scheduled activities
+    const colors = {
+        'interview': '#00acc1',
+        'ats_check': '#8b5cf6',
+        'jd_match': '#f59e0b',
+        'practice': '#06b6d4'
+    };
+    
+    return colors[activityType] || '#00acc1';
+}
+
+async function showDayActivities(dateStr) {
+    try {
+        // Remove existing modal if any
+        const existingModal = document.querySelector('.modal-overlay');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Fetch activities for the selected date
+        const result = await API.getActivitiesByDate(dateStr);
+        
+        if (!result.success) {
+            showNotification('Failed to load activities', 'error');
+            return;
+        }
+        
+        const activities = result.data.activities || [];
+        const date = new Date(dateStr);
+        const dateFormatted = date.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.onclick = () => overlay.remove();
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'day-activity-modal';
+        modal.onclick = (e) => e.stopPropagation();
+        
+        // Generate activities HTML
+        let activitiesHTML = '';
+        if (activities.length === 0) {
+            activitiesHTML = `
+                <div class="no-activities">
+                    <div class="no-activities-icon">📅</div>
+                    <div class="no-activities-text">No activities on this day</div>
+                </div>
+            `;
+        } else {
+            activitiesHTML = `<div class="activity-list">`;
+            activities.forEach(activity => {
+                const icon = getActivityIcon(activity.activity_type);
+                const time = new Date(activity.date).toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit' 
+                });
+                
+                activitiesHTML += `
+                    <div class="activity-item">
+                        <div class="activity-icon">${icon}</div>
+                        <div class="activity-content">
+                            <div class="activity-type">${activity.activity_type.replace('_', ' ')}</div>
+                            <div class="activity-title">${activity.title}</div>
+                            ${activity.description ? `<div class="activity-description">${activity.description}</div>` : ''}
+                            <div class="activity-description" style="margin-top: 0.25rem; font-size: 0.75rem;">
+                                ${time} • ${activity.status}
+                            </div>
+                        </div>
+                        ${activity.score ? `<div class="activity-score">${activity.score}</div>` : ''}
+                    </div>
+                `;
+            });
+            activitiesHTML += `</div>`;
+        }
+        
+        modal.innerHTML = `
+            <div class="modal-header">
+                <h3>${dateFormatted}</h3>
+                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+            </div>
+            <div class="modal-body">
+                ${activitiesHTML}
+            </div>
+        `;
+        
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        
+    } catch (error) {
+        console.error('Error showing day activities:', error);
+        showNotification('Failed to load activities', 'error');
+    }
+}
+
+function getActivityIcon(activityType) {
+    const icons = {
+        'interview': '🎤',
+        'ats_check': '📄',
+        'jd_match': '🎯',
+        'practice': '💪'
+    };
+    return icons[activityType] || '📌';
+}
+
+async function updateUpcomingSessions() {
+    const upcomingEl = document.getElementById('upcoming-sessions');
+    if (!upcomingEl) return;
+    
+    try {
+        const now = new Date().toISOString();
+        const future = new Date();
+        future.setDate(future.getDate() + 30);
+        
+        const result = await API.getCalendarActivities(now, future.toISOString());
+        
+        if (!result.success || !result.data.activities) {
+            upcomingEl.innerHTML = '<p class="text-xs text-gray-500">No scheduled activities</p>';
+            return;
+        }
+        
+        const upcoming = result.data.activities
+            .filter(a => a.status === 'scheduled' && new Date(a.date) > new Date())
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .slice(0, 3);
+        
+        if (upcoming.length === 0) {
+            upcomingEl.innerHTML = '<p class="text-xs text-gray-500">No scheduled activities</p>';
+            return;
+        }
+        
+        upcomingEl.innerHTML = upcoming.map(activity => {
+            const date = new Date(activity.date);
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            
+            return `
+                <div class="session-item">
+                    <div class="font-semibold text-white text-xs">${activity.title}</div>
+                    <div class="text-accent-cyan text-xs">${dateStr} at ${timeStr}</div>
+                </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Error loading upcoming sessions:', error);
+        upcomingEl.innerHTML = '<p class="text-xs text-gray-500">No scheduled activities</p>';
+    }
 }
 
 function getCalendarEvents() {
@@ -292,19 +548,36 @@ function loadResume() {
                     ${resumes.map(resume => `
                         <div class="p-4 bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg">
                             <div class="flex justify-between items-center">
-                                <div>
+                                <div class="flex-1">
                                     <h3 class="font-semibold text-lg">${resume.fileName}</h3>
                                     <p class="text-sm text-gray-400">Uploaded: ${new Date(resume.uploadedAt).toLocaleDateString()}</p>
                                     ${resume.atsScore ? `<p class="text-sm text-accent-cyan">ATS Score: ${resume.atsScore}%</p>` : ''}
                                 </div>
                                 <div class="flex gap-2">
                                     <button onclick="viewResume('${resume.resumeId}')" 
-                                            class="px-4 py-2 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                                            class="px-4 py-2 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition flex items-center gap-2"
+                                            title="View Resume">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
                                         View
                                     </button>
                                     <button onclick="downloadResume('${resume.resumeId}', '${resume.fileName}')" 
-                                            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                                            title="Download Resume">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                        </svg>
                                         Download
+                                    </button>
+                                    <button onclick="deleteResume('${resume.resumeId}')" 
+                                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+                                            title="Delete Resume">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                        Delete
                                     </button>
                                 </div>
                             </div>
@@ -340,37 +613,122 @@ function loadResume() {
 }
 
 async function viewResume(resumeId) {
+    console.log('=== VIEW RESUME START ===');
+    console.log('Resume ID:', resumeId);
+    
     try {
+        showNotification('Loading resume...', 'info');
+        
         const blob = await API.getResumeFile(resumeId);
-        if (blob) {
+        console.log('Blob received:', {
+            type: blob?.type,
+            size: blob?.size,
+            exists: !!blob
+        });
+        
+        if (blob && blob.size > 0) {
             const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
+            console.log('Object URL created:', url);
+            
+            // Create a modal to view the PDF
+            const modal = document.createElement('div');
+            modal.className = 'modal-backdrop';
+            modal.innerHTML = `
+                <div class="modal-container" style="max-width: 90vw; width: 1200px; height: 90vh;">
+                    <div class="modal-header">
+                        <h2 class="text-2xl font-bold">Resume Viewer</h2>
+                        <button onclick="this.closest('.modal-backdrop').remove(); URL.revokeObjectURL('${url}')" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="height: calc(100% - 80px); overflow: hidden;">
+                        <iframe src="${url}" type="application/pdf" style="width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            showNotification('Resume loaded successfully', 'success');
         } else {
-            showNotification('Failed to load resume file', 'error');
+            console.error('Invalid blob received');
+            showNotification('Failed to load resume file - blob is empty', 'error');
         }
     } catch (error) {
-        console.error('Error viewing resume:', error);
-        showNotification('Error viewing resume', 'error');
+        console.error('=== VIEW RESUME ERROR ===');
+        console.error('Error details:', error);
+        showNotification('Error: ' + error.message, 'error');
     }
 }
 
 async function downloadResume(resumeId, fileName) {
+    console.log('=== DOWNLOAD RESUME START ===');
+    console.log('Resume ID:', resumeId);
+    console.log('File Name:', fileName);
+    
     try {
+        showNotification('Downloading resume...', 'info');
+        
         const blob = await API.getResumeFile(resumeId);
-        if (blob) {
+        console.log('Blob received for download:', {
+            type: blob?.type,
+            size: blob?.size,
+            exists: !!blob
+        });
+        
+        if (blob && blob.size > 0) {
+            // Create download link
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
+            a.style.display = 'none';
             a.href = url;
-            a.download = fileName;
+            a.download = fileName || 'resume.pdf';
+            
+            // Trigger download
+            document.body.appendChild(a);
+            console.log('Triggering download...');
             a.click();
-            URL.revokeObjectURL(url);
-            showNotification('Resume downloaded!', 'success');
+            
+            // Cleanup
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                console.log('Download cleanup complete');
+            }, 100);
+            
+            showNotification('Resume downloaded successfully!', 'success');
         } else {
-            showNotification('Failed to download resume', 'error');
+            console.error('Invalid blob for download');
+            showNotification('Failed to download resume - blob is empty', 'error');
         }
     } catch (error) {
-        console.error('Error downloading resume:', error);
-        showNotification('Error downloading resume', 'error');
+        console.error('=== DOWNLOAD RESUME ERROR ===');
+        console.error('Error details:', error);
+        showNotification('Error: ' + error.message, 'error');
+    }
+}
+
+async function deleteResume(resumeId) {
+    // Confirm deletion
+    if (!confirm('Are you sure you want to delete this resume? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        showNotification('Deleting resume...', 'info');
+        const response = await API.deleteResume(resumeId);
+        
+        if (response.success) {
+            showNotification('Resume deleted successfully!', 'success');
+            // Reload the resume list
+            loadResume();
+        } else {
+            showNotification(response.message || 'Failed to delete resume', 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting resume:', error);
+        showNotification('Error deleting resume', 'error');
     }
 }
 
@@ -460,70 +818,135 @@ async function loadProfile() {
         profileView.innerHTML = `
             <h1 class="text-3xl font-bold mb-6">My Profile</h1>
             
-            <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
-                <div id="profile-view-mode">
-                    <div class="space-y-6">
-                        <div class="flex items-center gap-6 mb-8">
-                            <div class="w-24 h-24 bg-accent-cyan/20 rounded-full flex items-center justify-center text-4xl font-bold text-accent-cyan">
-                                ${profile.fullName.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <h2 class="text-2xl font-bold">${profile.fullName}</h2>
-                                <p class="text-gray-400">${profile.email}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-2">Full Name</label>
-                                <p class="text-lg">${profile.fullName}</p>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-2">Email</label>
-                                <p class="text-lg">${profile.email}</p>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-2">Phone</label>
-                                <p class="text-lg">${profile.phone || 'Not provided'}</p>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-2">Member Since</label>
-                                <p class="text-lg">${new Date(profile.createdAt).toLocaleDateString()}</p>
-                            </div>
-                        </div>
-                        
-                        ${profile.education && profile.education.length > 0 ? `
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-4">Education</label>
-                                <div class="space-y-3">
-                                    ${profile.education.map(edu => `
-                                        <div class="p-4 bg-primary-dark rounded-lg border border-accent-cyan/10">
-                                            <h4 class="font-semibold">${edu.degree} in ${edu.field || 'N/A'}</h4>
-                                            <p class="text-gray-400">${edu.institution}</p>
-                                            <p class="text-sm text-gray-500">${edu.year || 'N/A'}</p>
-                                        </div>
-                                    `).join('')}
+            <div class="grid gap-6 md:grid-cols-3">
+                <!-- Profile Card -->
+                <div class="md:col-span-2 bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
+                    <div id="profile-view-mode">
+                        <div class="space-y-6">
+                            <div class="flex items-center gap-6 mb-8">
+                                <div class="relative">
+                                    <div id="profile-avatar" class="w-24 h-24 bg-accent-cyan/20 rounded-full flex items-center justify-center text-4xl font-bold text-accent-cyan overflow-hidden">
+                                        ${Storage.getUser()?.profilePicture 
+                                            ? `<img src="${Storage.getUser().profilePicture}" class="w-full h-full object-cover" alt="Profile">`
+                                            : profile.fullName.charAt(0).toUpperCase()
+                                        }
+                                    </div>
+                                    <button onclick="changeProfilePicture()" class="absolute bottom-0 right-0 bg-accent-cyan text-white p-2 rounded-full hover:bg-accent-cyan/90 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-bold">${profile.fullName}</h2>
+                                    <p class="text-gray-400">${profile.email}</p>
                                 </div>
                             </div>
-                        ` : ''}
-                        
-                        <div class="flex gap-4 mt-8">
-                            <button onclick="editProfile()" 
-                                    class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
-                                Edit Profile
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-2">Full Name</label>
+                                    <p class="text-lg">${profile.fullName}</p>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-2">Email</label>
+                                    <p class="text-lg">${profile.email}</p>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-2">Phone</label>
+                                    <p class="text-lg">${profile.phone || 'Not provided'}</p>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-2">Member Since</label>
+                                    <p class="text-lg">${new Date(profile.createdAt).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            
+                            ${profile.education && profile.education.length > 0 ? `
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-400 mb-4">Education</label>
+                                    <div class="space-y-3">
+                                        ${profile.education.map(edu => `
+                                            <div class="p-4 bg-primary-dark rounded-lg border border-accent-cyan/10">
+                                                <h4 class="font-semibold">${edu.degree} in ${edu.field || 'N/A'}</h4>
+                                                <p class="text-gray-400">${edu.institution}</p>
+                                                <p class="text-sm text-gray-500">${edu.year || 'N/A'}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="flex gap-4 mt-8">
+                                <button onclick="editProfile()" 
+                                        class="px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                                    ✏️ Edit Profile
+                                </button>
+                                <button onclick="changePassword()" 
+                                        class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                                    🔒 Change Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="profile-edit-mode" class="hidden">
+                        <!-- Edit form will be inserted here -->
+                    </div>
+                </div>
+                
+                <!-- Stats Card -->
+                <div class="space-y-6">
+                    <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">Profile Stats</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">Total Interviews</span>
+                                <span class="text-xl font-bold text-accent-cyan">${Storage.getInterviews().length}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">ATS Checks</span>
+                                <span class="text-xl font-bold text-accent-cyan">${Storage.getATSResults().length}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">JD Matches</span>
+                                <span class="text-xl font-bold text-accent-cyan">${Storage.getJDMatches().length}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">Resumes</span>
+                                <span class="text-xl font-bold text-accent-cyan" id="resume-count">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-primary-dark-secondary border border-accent-cyan/20 rounded-lg p-6">
+                        <h3 class="text-lg font-bold mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button onclick="showView('ats')" class="w-full px-4 py-2 bg-accent-cyan/20 text-accent-cyan rounded-lg hover:bg-accent-cyan/30 transition">
+                                📄 Check ATS Score
+                            </button>
+                            <button onclick="showView('jdmatcher')" class="w-full px-4 py-2 bg-accent-cyan/20 text-accent-cyan rounded-lg hover:bg-accent-cyan/30 transition">
+                                🎯 Match Job Description
+                            </button>
+                            <button onclick="showView('interview')" class="w-full px-4 py-2 bg-accent-cyan/20 text-accent-cyan rounded-lg hover:bg-accent-cyan/30 transition">
+                                🎤 Take Interview
                             </button>
                         </div>
                     </div>
                 </div>
-                
-                <div id="profile-edit-mode" class="hidden">
-                    <!-- Edit form will be inserted here -->
-                </div>
             </div>
         `;
+        
+        // Load resume count
+        API.getUserResumes().then(res => {
+            if (res.success && res.data) {
+                document.getElementById('resume-count').textContent = res.data.length;
+            }
+        });
     } else {
         profileView.innerHTML = `
             <div class="text-center py-12">
@@ -615,3 +1038,163 @@ function cancelEditProfile() {
     editMode.classList.add('hidden');
     viewMode.classList.remove('hidden');
 }
+
+function changeProfilePicture() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const imgData = event.target.result;
+                
+                // Save to localStorage
+                const user = Storage.getUser();
+                if (user) {
+                    user.profilePicture = imgData;
+                    Storage.saveUser(user);
+                    
+                    // Update avatar display
+                    const avatar = document.getElementById('profile-avatar');
+                    if (avatar) {
+                        avatar.innerHTML = `<img src="${imgData}" class="w-full h-full rounded-full object-cover" alt="Profile">`;
+                    }
+                    
+                    // Update header avatar
+                    const headerAvatar = document.getElementById('user-avatar');
+                    if (headerAvatar && headerAvatar.parentElement) {
+                        headerAvatar.parentElement.innerHTML = `<img src="${imgData}" class="w-8 h-8 rounded-full object-cover" alt="Profile">`;
+                    }
+                    
+                    showNotification('Profile picture updated!', 'success');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    
+    input.click();
+}
+
+function changePassword() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = `
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 class="text-2xl font-bold">Change Password</h2>
+                <button onclick="this.closest('.modal-backdrop').remove()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="change-password-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Current Password</label>
+                        <input type="password" id="current-password" required
+                               class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">New Password</label>
+                        <input type="password" id="new-password" required minlength="6"
+                               class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white">
+                        <p class="text-xs text-gray-400 mt-1">Minimum 6 characters</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Confirm New Password</label>
+                        <input type="password" id="confirm-password" required minlength="6"
+                               class="w-full px-4 py-3 bg-primary-dark border border-accent-cyan/30 rounded-lg focus:outline-none focus:border-accent-cyan text-white">
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button type="submit" 
+                                class="flex-1 px-6 py-3 bg-accent-cyan text-white rounded-lg hover:bg-accent-cyan/90 transition">
+                            Change Password
+                        </button>
+                        <button type="button" onclick="this.closest('.modal-backdrop').remove()" 
+                                class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Handle form submission
+    document.getElementById('change-password-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        
+        if (newPassword !== confirmPassword) {
+            showNotification('New passwords do not match!', 'error');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            showNotification('Password must be at least 6 characters!', 'error');
+            return;
+        }
+        
+        // Note: In a real app, this would call an API endpoint to change password
+        // For now, just show a success message
+        showNotification('Password change functionality requires backend implementation', 'info');
+        modal.remove();
+        
+        // TODO: Implement API call when backend endpoint is ready
+        // API.changePassword(currentPassword, newPassword).then(...)
+    });
+}
+
+// Calendar Activity Logging Helper Functions
+async function logCalendarActivity(activityType, title, metadata = {}) {
+    try {
+        const activityData = {
+            activity_type: activityType,
+            title: title,
+            description: metadata.description || null,
+            date: new Date().toISOString(),
+            score: metadata.score || null,
+            status: metadata.status || 'completed',
+            reference_id: metadata.reference_id || null,
+            metadata: metadata
+        };
+        
+        const result = await API.createCalendarActivity(activityData);
+        
+        if (result.success) {
+            // Refresh calendar if it exists
+            if (window.dashboardCalendar) {
+                window.dashboardCalendar.refetchEvents();
+            }
+            // Refresh upcoming sessions
+            updateUpcomingSessions();
+        }
+        
+        return result;
+    } catch (error) {
+        console.error('Error logging calendar activity:', error);
+        return { success: false, error };
+    }
+}
+
+// Expose globally for use in other modules
+window.logCalendarActivity = logCalendarActivity;
+window.refreshCalendar = function() {
+    if (window.dashboardCalendar) {
+        window.dashboardCalendar.refetchEvents();
+        updateUpcomingSessions();
+    }
+};

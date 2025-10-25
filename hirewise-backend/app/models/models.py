@@ -147,3 +147,22 @@ class Testimonial(BaseModel):
         populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+
+# Calendar Activity Model
+class CalendarActivity(BaseModel):
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    user_id: str
+    activity_type: str  # interview, ats_check, jd_match, practice
+    title: str
+    description: Optional[str] = None
+    date: datetime
+    score: Optional[float] = None
+    status: str  # scheduled, completed, cancelled
+    reference_id: Optional[str] = None  # Reference to interview_id, ats_id, etc.
+    metadata: Optional[dict] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
